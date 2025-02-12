@@ -1,0 +1,32 @@
+{
+  "def": {
+    "1": {
+      "id": "1",
+      "name": "Multisport"
+    },
+    "2": {
+      "id": "2",
+      "name": "MyLife"
+    },
+    "3": {
+      "id": "3",
+      "name": "BeActive"
+    },
+    "4": {
+      "id": "4",
+      "name": "Fitprofit"
+    },
+    "5": {
+      "id": "5",
+      "name": "FitSport"
+    }
+  },
+  "version": 1,
+  "order": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+  ]
+}

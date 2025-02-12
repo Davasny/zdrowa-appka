@@ -1,0 +1,7 @@
+.idea/
+node_modules/
+*.apk
+*.xapk
+mitmproxy.flows
+patched/
+logs/
