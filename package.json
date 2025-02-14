@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "prepare": "husky",
+    "fmt:staged": "lint-staged"
   },
   "keywords": [],
   "author": "",
@@ -13,10 +15,15 @@
     "@types/node": "^22.13.4",
     "apk-mitm": "^1.3.0",
     "dotenv": "^16.4.7",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3",
     "prettier": "^3.5.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "vitest": "^3.0.5",
     "wretch": "^2.11.0"
+  },
+  "lint-staged": {
+    "*.ts": "prettier --write"
   }
 }
