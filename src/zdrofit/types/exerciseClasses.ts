@@ -18,9 +18,16 @@ export interface ExerciseClassApi {
   room: string;
 }
 
-export type ExerciseClass = ExerciseClassApi & {
+export type ExerciseClassSimple = ExerciseClassApi & {
   dateObject: Date;
   state: ExerciseClassState;
+};
+
+export type ExerciseClassFull = ExerciseClassSimple & {
+  classTypeObject: ClassType | null;
+  coachObject: Instructor | null;
+  categoryObject: Category | null;
+  clubObject: Club | null;
 };
 
 type ExerciseClassState =

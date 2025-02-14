@@ -1,7 +1,7 @@
 import wretch, { Wretch } from "wretch";
 import { AccessToken, LoginPayload, LoginResponse } from "./types/login";
 import { PaginationResponse, Path } from "./types/pagination";
-import { Club } from "./types/clubs";
+import { Club, ClubsResponse } from "./types/clubs";
 import { Instructor } from "./types/instructors";
 import { ClassType } from "./types/classTypes";
 import { Category } from "./types/categories";
@@ -10,10 +10,11 @@ import {
   BookExerciseClassResponse,
   BookOrCancelExerciseClassPayload,
   CancelExerciseClassPayload,
-  ExerciseClass,
+  ExerciseClassSimple,
   ExerciseClassApi,
   ExerciseClassesPayload,
   ExerciseClassesResponse,
+  ExerciseClassFull,
 } from "./types/exerciseClasses";
 import { DateString } from "./types/common";
 import { UserHistoryPayload, UserHistoryResponse } from "./types/userHistory";
@@ -39,10 +40,10 @@ export class ZdrofitClient {
   private pages: PaginationResponse["def_2"];
   private pagesPrefix: PaginationResponse["path"];
 
-  private clubs: Club[];
-  private instructors: Instructor[];
-  private classTypes: ClassType[];
-  private categories: Category[];
+  private clubs: Map<Club["id"], Club>;
+  private instructors: Map<Instructor["id"], Instructor>;
+  private classTypes: Map<ClassType["id"], ClassType>;
+  private categories: Map<Category["id"], Category>;
 
   constructor(
     accessToken: AccessToken,
@@ -65,10 +66,10 @@ export class ZdrofitClient {
       cards: [],
     };
 
-    this.clubs = [];
-    this.instructors = [];
-    this.classTypes = [];
-    this.categories = [];
+    this.clubs = new Map();
+    this.instructors = new Map();
+    this.classTypes = new Map();
+    this.categories = new Map();
   }
 
   static async getAccessToken(payload: LoginPayload): Promise<AccessToken> {
@@ -95,7 +96,7 @@ export class ZdrofitClient {
 
   async loadClubs(): Promise<Club[]> {
     const data = await this.getPaginatedData<Club>(this.pages.clubs);
-    this.clubs = data;
+    this.clubs = new Map(data.map((c) => [c.id, c]));
     return data;
   }
 
@@ -103,23 +104,23 @@ export class ZdrofitClient {
     const data = await this.getPaginatedData<Instructor>(
       this.pages.instructors,
     );
-    this.instructors = data;
+    this.instructors = new Map(data.map((i) => [i.id, i]));
     return data;
   }
 
   async loadClassTypes(): Promise<ClassType[]> {
     const data = await this.getPaginatedData<ClassType>(this.pages.class_types);
-    this.classTypes = data;
+    this.classTypes = new Map(data.map((t) => [t.id, t]));
     return data;
   }
 
   async loadCategories(): Promise<Category[]> {
     const data = await this.getPaginatedData<Category>(this.pages.categories);
-    this.categories = data;
+    this.categories = new Map(data.map((c) => [c.id, c]));
     return data;
   }
 
-  async findExerciseClasses(date: DateString): Promise<ExerciseClass[]> {
+  async findExerciseClasses(date: DateString): Promise<ExerciseClassSimple[]> {
     const payload: ExerciseClassesPayload = {
       instructors: [],
       clubs: [],
@@ -138,7 +139,7 @@ export class ZdrofitClient {
       .post(payload)
       .json<ExerciseClassesResponse>();
 
-    const classesWithDate: ExerciseClass[] = Object.values(response.data)
+    const classesWithDate: ExerciseClassSimple[] = Object.values(response.data)
       .flat()
       .map((e) => this.fillExerciseClassesWithDate(e, response.state));
 
@@ -195,13 +196,13 @@ export class ZdrofitClient {
     return response;
   }
 
-  async getUserClasses(): Promise<ExerciseClass[]> {
+  async getUserClasses(): Promise<ExerciseClassSimple[]> {
     const response = await this.client
       .url("/api-service/v2/with_auth/user_classes?parent_view=schedule_page_2")
       .get()
       .json<ExerciseClassesResponse>();
 
-    const classesWithDate: ExerciseClass[] = Object.values(response.data)
+    const classesWithDate: ExerciseClassSimple[] = Object.values(response.data)
       .flat()
       .map((e) => this.fillExerciseClassesWithDate(e, response.state));
 
@@ -220,6 +221,27 @@ export class ZdrofitClient {
       )
       .post(payload)
       .json<UserHistoryResponse>();
+  }
+
+  async getExerciseClasses(date: DateString): Promise<ExerciseClassFull[]> {
+    const classes = await this.findExerciseClasses(date);
+
+    const fullClasses: ExerciseClassFull[] = classes.map((c) => {
+      const coach = this.instructors.get(c.coach);
+      const classType = this.classTypes.get(c.classType);
+      const category = this.categories.get(c.category);
+      const club = this.clubs.get(c.location);
+
+      return {
+        ...c,
+        clubObject: club || null,
+        classTypeObject: classType || null,
+        coachObject: coach || null,
+        categoryObject: category || null,
+      };
+    });
+
+    return fullClasses;
   }
 
   private async getPaginatedData<T>(pages: Path[]): Promise<T[]> {
@@ -242,7 +264,7 @@ export class ZdrofitClient {
   private fillExerciseClassesWithDate(
     apiClass: ExerciseClassApi,
     states: ExerciseClassesResponse["state"],
-  ): ExerciseClass {
+  ): ExerciseClassSimple {
     return {
       ...apiClass,
       dateObject: new Date(`${apiClass.date}T${apiClass.start_time}:00`),

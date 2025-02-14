@@ -1,5 +1,5 @@
 import { assert, beforeAll, describe, expect, it } from "vitest";
-import { ZdrofitClient } from "./client";
+import { ZdrofitClient } from "./ZdrofitClient";
 import {
   convertDateToString,
   getNextWeekMFSStrings,
