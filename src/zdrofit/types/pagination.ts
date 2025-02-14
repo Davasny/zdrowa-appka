@@ -1,4 +1,4 @@
-type Path = string;
+export type Path = string;
 
 export interface PaginationResponse {
   path: "/static/authorized/";

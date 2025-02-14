@@ -4,8 +4,10 @@ export interface LoginPayload {
   network_id: "mfp";
 }
 
+export type AccessToken = string;
+
 export interface LoginResponse {
-  access_token: string;
+  access_token: AccessToken;
   destination: {
     id: string;
     type: string;

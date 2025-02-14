@@ -5,3 +5,4 @@ node_modules/
 mitmproxy.flows
 patched/
 logs/
+.env
