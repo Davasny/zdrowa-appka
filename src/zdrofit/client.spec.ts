@@ -1,5 +1,10 @@
 import { assert, beforeAll, describe, expect, it } from "vitest";
 import { ZdrofitClient } from "./client";
+import {
+  convertDateToString,
+  getNextWeekMFSStrings,
+  getNthNextDay,
+} from "../utils";
 
 import "dotenv/config";
 
@@ -56,6 +61,23 @@ describe("Check fetching data from authorized endpoints", async () => {
     await client.loadPagination();
   });
 
+  const getNextWeekExerciseClasses = async () => {
+    // checking three days to make sure we don't fell into some national holiday
+
+    const { monday, wednesday, friday } = getNextWeekMFSStrings();
+
+    const nextMondayClasses = await client.findExerciseClasses(monday);
+    const nextWednesdayClasses = await client.findExerciseClasses(wednesday);
+    const nextFridayClasses = await client.findExerciseClasses(friday);
+
+    // merge all classes
+    return [
+      ...nextMondayClasses,
+      ...nextWednesdayClasses,
+      ...nextFridayClasses,
+    ];
+  };
+
   it("Checks if loadClubs returns list of clubs", async () => {
     const clubs = await client.loadClubs();
 
@@ -78,5 +100,67 @@ describe("Check fetching data from authorized endpoints", async () => {
     const categories = await client.loadCategories();
 
     expect(categories.length).toBeGreaterThan(0);
+  });
+
+  it("Checks if findExerciseClasses returns any class for next week", async () => {
+    const nextWeekClasses = await getNextWeekExerciseClasses();
+    // any of the days should have classes
+    expect(nextWeekClasses.length).toBeGreaterThan(0);
+  });
+
+  it("Checks booking and cancelling class flow", async () => {
+    const nextDaysClasses = [
+      ...(await client.findExerciseClasses(
+        convertDateToString(getNthNextDay(1)),
+      )),
+      ...(await client.findExerciseClasses(
+        convertDateToString(getNthNextDay(2)),
+      )),
+    ];
+
+    expect(nextDaysClasses.length).toBeGreaterThan(0);
+
+    const sortedClasses = nextDaysClasses.sort(
+      (a, b) => b.dateObject.getTime() - a.dateObject.getTime(),
+    );
+
+    const now = new Date();
+    const fortyEightHoursFromNow = new Date(
+      now.getTime() + 48 * 60 * 60 * 1000,
+    );
+
+    // find last class that is at least 48 hours from now
+    const lastClassIndex = sortedClasses.findIndex(
+      (c) =>
+        c.dateObject.getTime() <= fortyEightHoursFromNow.getTime() &&
+        c.state === "to_be_booked",
+    );
+
+    const pickedClass = sortedClasses[lastClassIndex];
+
+    expect(pickedClass).toBeDefined();
+
+    // ensure we book class at least 12 hours from now
+    // in case of exceptions we can always cancel it by hand in app
+    const twelveHoursInMs = 12 * 60 * 60 * 1000;
+    const twelveHoursFromNow = new Date(now.getTime() + twelveHoursInMs);
+    expect(pickedClass.dateObject.getTime()).toBeGreaterThanOrEqual(
+      twelveHoursFromNow.getTime(),
+    );
+
+    await client.bookOrCancelClass({
+      classId: pickedClass.id.toString(),
+      action: "book",
+      date: pickedClass.date,
+    });
+
+    // wait 2 sec to avoid ddosing their API
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+
+    await client.bookOrCancelClass({
+      classId: pickedClass.id.toString(),
+      action: "cancel",
+      date: pickedClass.date,
+    });
   });
 });

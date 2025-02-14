@@ -5,6 +5,16 @@ import { Club } from "./types/clubs";
 import { Instructor } from "./types/instructors";
 import { ClassType } from "./types/classTypes";
 import { Category } from "./types/categories";
+import {
+  BookExerciseClassPayload,
+  BookExerciseClassResponse,
+  BookOrCancelExerciseClassPayload,
+  CancelExerciseClassPayload,
+  ExerciseClass,
+  ExerciseClassesPayload,
+  ExerciseClassesResponse,
+} from "./types/exerciseClasses";
+import { DateString } from "./types/common";
 
 const ZDROFIT_API_URL = "https://appfitness.zdrofit.pl";
 
@@ -105,6 +115,86 @@ export class ZdrofitClient {
     const data = await this.getPaginatedData<Category>(this.pages.categories);
     this.categories = data;
     return data;
+  }
+
+  async findExerciseClasses(date: DateString): Promise<ExerciseClass[]> {
+    const payload: ExerciseClassesPayload = {
+      instructors: [],
+      clubs: [],
+      class_types: [],
+      class_categories: [],
+      partner_cards: [],
+      class_tags: [],
+      time_ranges: [],
+      search_date: date,
+    };
+
+    const response = await this.client
+      .url(
+        "/api-service/v2/with_auth/search_classes?parent_view=schedule_page_2",
+      )
+      .post(payload)
+      .json<ExerciseClassesResponse>();
+
+    const classesWithDate: ExerciseClass[] = Object.values(response.data)
+      .flat()
+      .map((item) => ({
+        ...item,
+        dateObject: new Date(`${item.date}T${item.start_time}:00`),
+        state: response.state[item.id],
+      }));
+
+    return classesWithDate;
+  }
+
+  async bookOrCancelClass(props: {
+    classId: string;
+    date: DateString;
+    action: "book" | "cancel";
+  }): Promise<BookExerciseClassResponse> {
+    const searchClasses: BookOrCancelExerciseClassPayload = {
+      search_classes: {
+        instructors: [],
+        clubs: [],
+        class_types: [],
+        class_categories: [],
+        partner_cards: [],
+        class_tags: null,
+        time_ranges: [],
+        search_date: props.date,
+      },
+    };
+
+    let payload: BookExerciseClassPayload | CancelExerciseClassPayload;
+    let url: string;
+
+    if (props.action === "book") {
+      url =
+        "/api-service/v2/with_auth/agregate?$providers=%5Bbook_class,%20search_classes%5D&parent_view=schedule_page_2";
+      payload = {
+        ...searchClasses,
+        book_class: {
+          reserve: false,
+          classId: props.classId,
+        },
+      };
+    } else {
+      url =
+        "/api-service/v2/with_auth/agregate?$providers=%5Bbook_cancel_class,%20search_classes%5D&parent_view=schedule_page_2";
+      payload = {
+        ...searchClasses,
+        book_cancel_class: {
+          classId: props.classId,
+        },
+      };
+    }
+
+    const response = await this.client
+      .url(url)
+      .post(payload)
+      .json<BookExerciseClassResponse>();
+
+    return response;
   }
 
   private async getPaginatedData<T>(pages: Path[]): Promise<T[]> {
