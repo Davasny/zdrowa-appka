@@ -4,7 +4,7 @@ import {
   convertDateToString,
   getNextWeekMFSStrings,
   getNthNextDay,
-} from "../utils";
+} from "./utils";
 
 import "dotenv/config";
 

@@ -1,4 +1,4 @@
-import { DateString } from "./zdrofit/types/common";
+import { DateString } from "./types/common";
 
 export function getNextWeekMWF(): {
   monday: Date;
