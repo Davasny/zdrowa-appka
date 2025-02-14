@@ -14,5 +14,3 @@ export interface LoginResponse {
     off_all: boolean;
   };
 }
-
-
