@@ -11,10 +11,12 @@ import {
   BookOrCancelExerciseClassPayload,
   CancelExerciseClassPayload,
   ExerciseClass,
+  ExerciseClassApi,
   ExerciseClassesPayload,
   ExerciseClassesResponse,
 } from "./types/exerciseClasses";
 import { DateString } from "./types/common";
+import { UserHistoryPayload, UserHistoryResponse } from "./types/userHistory";
 
 const ZDROFIT_API_URL = "https://appfitness.zdrofit.pl";
 
@@ -138,11 +140,7 @@ export class ZdrofitClient {
 
     const classesWithDate: ExerciseClass[] = Object.values(response.data)
       .flat()
-      .map((item) => ({
-        ...item,
-        dateObject: new Date(`${item.date}T${item.start_time}:00`),
-        state: response.state[item.id],
-      }));
+      .map((e) => this.fillExerciseClassesWithDate(e, response.state));
 
     return classesWithDate;
   }
@@ -197,6 +195,33 @@ export class ZdrofitClient {
     return response;
   }
 
+  async getUserClasses(): Promise<ExerciseClass[]> {
+    const response = await this.client
+      .url("/api-service/v2/with_auth/user_classes?parent_view=schedule_page_2")
+      .get()
+      .json<ExerciseClassesResponse>();
+
+    const classesWithDate: ExerciseClass[] = Object.values(response.data)
+      .flat()
+      .map((e) => this.fillExerciseClassesWithDate(e, response.state));
+
+    return classesWithDate;
+  }
+
+  async getUserHistory(): Promise<UserHistoryResponse> {
+    const payload: UserHistoryPayload = {
+      types: ["club", "device"],
+      page: 1,
+    };
+
+    return await this.client
+      .url(
+        "/api-service/v2/with_auth/lifestyle_act_history?parent_view=workouts_history_page",
+      )
+      .post(payload)
+      .json<UserHistoryResponse>();
+  }
+
   private async getPaginatedData<T>(pages: Path[]): Promise<T[]> {
     let data: T[] = [];
 
@@ -212,5 +237,16 @@ export class ZdrofitClient {
     }
 
     return data;
+  }
+
+  private fillExerciseClassesWithDate(
+    apiClass: ExerciseClassApi,
+    states: ExerciseClassesResponse["state"],
+  ): ExerciseClass {
+    return {
+      ...apiClass,
+      dateObject: new Date(`${apiClass.date}T${apiClass.start_time}:00`),
+      state: states[apiClass.id],
+    };
   }
 }

@@ -154,13 +154,26 @@ describe("Check fetching data from authorized endpoints", async () => {
       date: pickedClass.date,
     });
 
-    // wait 2 sec to avoid ddosing their API
-    await new Promise((resolve) => setTimeout(resolve, 2_000));
+    let bookedClasses = await client.getUserClasses();
+    let bookedClass = bookedClasses.find((c) => c.id === pickedClass.id);
+
+    expect(bookedClass).toBeDefined();
+    expect(bookedClass?.state).toBe("booked");
 
     await client.bookOrCancelClass({
       classId: pickedClass.id.toString(),
       action: "cancel",
       date: pickedClass.date,
     });
+
+    bookedClasses = await client.getUserClasses();
+    bookedClass = bookedClasses.find((c) => c.id === pickedClass.id);
+
+    expect(bookedClass).not.toBeDefined();
+  });
+
+  it("Checks if getUserHistory returns anything", async () => {
+    const response = await client.getUserHistory();
+    expect(response.activities.length).toBeGreaterThan(0);
   });
 });
