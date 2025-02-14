@@ -6,3 +6,4 @@ mitmproxy.flows
 patched/
 logs/
 .env
+.next/
