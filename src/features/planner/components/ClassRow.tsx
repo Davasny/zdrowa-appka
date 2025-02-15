@@ -53,6 +53,7 @@ const ClassRowDialogContent = ({
   const stringDate = dayjs(simpleClass.dateObject).format("YYYY-MM-DD");
 
   // todo: refactor to single handler
+  // todo: show error message
 
   const handleBook = () => {
     setBookInProgress(true);

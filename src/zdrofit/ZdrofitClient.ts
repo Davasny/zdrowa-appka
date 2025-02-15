@@ -274,6 +274,13 @@ export class ZdrofitClient {
       .json<ExerciseClassDetailsResponse>();
   }
 
+  async removeCachedData(): Promise<void> {
+    this.clubs = new Map();
+    this.instructors = new Map();
+    this.classTypes = new Map();
+    this.categories = new Map();
+  }
+
   private async getPaginatedData<T>(pages: Path[]): Promise<T[]> {
     let data: T[] = [];
 

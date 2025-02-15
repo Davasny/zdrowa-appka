@@ -8,6 +8,7 @@ import { addDays } from "@/features/planner/utils/addDays";
 import { generateFullHours } from "@/features/planner/utils/generateFullHours";
 import { DAYS } from "@/features/planner/consts/i18n";
 import { FilterByName } from "@/features/planner/components/FilterByName";
+import { RefreshButton } from "@/features/planner/components/RefreshButton";
 
 export const Planner = () => {
   const [weekStart, setWeekStart] = useState<Date>(getStartOfWeek(new Date()));
@@ -33,6 +34,7 @@ export const Planner = () => {
       <Flex gap={2}>
         <FilterByLocation />
         <FilterByName/>
+        <RefreshButton/>
       </Flex>
 
       <Flex justifyContent="space-between">

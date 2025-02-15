@@ -125,4 +125,9 @@ app.post("/cancel-class", vValidator("json", bookClassSchema), async (c) => {
   return c.json(data);
 });
 
+app.post("/reset-cache", async (c) => {
+  await zdrofitClient.removeCachedData();
+  return c.json({ message: "Cache reset" });
+});
+
 export default handle(app);
