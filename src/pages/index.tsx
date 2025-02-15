@@ -1,17 +1,10 @@
-import Head from "next/head";
+import { Flex } from "@chakra-ui/react";
+import { Planner } from "@/features/planner/components/Planner";
 
 export default function Home() {
   return (
-    <>
-      <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Zdrofit" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <div>
-        Hello
-      </div>
-    </>
+    <Flex maxW="1440px" w="100%" mx="auto" p={2}>
+      <Planner />
+    </Flex>
   );
 }
