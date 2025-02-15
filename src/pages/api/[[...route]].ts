@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import type { PageConfig } from "next";
 import { ZdrofitClient } from "@/zdrofit/ZdrofitClient";
-import { object, pipe, regex, string } from "valibot";
+import { object, pipe, regex, string, transform } from "valibot";
 import { vValidator } from "@hono/valibot-validator";
 import { DateString } from "@/zdrofit/types/common";
 
@@ -72,5 +72,22 @@ app.get("/clubs", async (c) => {
   const data = await zdrofitClient.getClubs();
   return c.json(data);
 });
+
+const classDetailsSchema = object({
+  classId: pipe(
+    string(),
+    transform((v) => parseInt(v, 10)),
+  ),
+});
+
+app.get(
+  "/class-details",
+  vValidator("query", classDetailsSchema),
+  async (c) => {
+    const { classId } = c.req.valid("query");
+    const data = await zdrofitClient.getExerciseClassesDetails(classId);
+    return c.json(data);
+  },
+);
 
 export default handle(app);

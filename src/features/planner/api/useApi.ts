@@ -6,7 +6,10 @@ import { Instructor } from "@/zdrofit/types/instructors";
 import { ClassType } from "@/zdrofit/types/classTypes";
 import { Category } from "@/zdrofit/types/categories";
 import { useQuery } from "@tanstack/react-query";
-import { ExerciseClassSimple } from "@/zdrofit/types/exerciseClasses";
+import {
+  ExerciseClassDetailsResponse,
+  ExerciseClassSimple,
+} from "@/zdrofit/types/exerciseClasses";
 import { Club } from "@/zdrofit/types/clubs";
 
 export const useGetInstructors = () => useApiClient<Instructor>("/instructors");
@@ -21,5 +24,15 @@ export const useFindClasses = (date: string) => {
     queryKey: ["/find-classes", date],
     queryFn: () =>
       backendFetcher<ExerciseClassSimple[]>(`/find-classes?date=${date}`),
+  });
+};
+
+export const useGetClassDetails = (classId: number) => {
+  return useQuery<ExerciseClassDetailsResponse>({
+    queryKey: ["/class-details", classId],
+    queryFn: () =>
+      backendFetcher<ExerciseClassDetailsResponse>(
+        `/class-details?classId=${classId}`,
+      ),
   });
 };

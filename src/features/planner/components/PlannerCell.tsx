@@ -24,7 +24,7 @@ export const PlannerCell = ({ day, hour }: { day: Date; hour: string }) => {
   }
 
   return (
-    <Table.Cell key={day.toLocaleDateString()}>
+    <Table.Cell key={day.toLocaleDateString()} verticalAlign="top">
       <Flex flexDirection="column" gap={2}>
         {classesAtHour?.map((c) => <ClassRow key={c.id} simpleClass={c} />)}
       </Flex>

@@ -11,7 +11,7 @@ import {
   SelectValueText,
 } from "@/components/ui/select";
 
-export const ClubFilter = () => {
+export const FilterByLocation = () => {
   const { data: clubs } = useGetClubs();
 
   const collection = createListCollection({
@@ -32,7 +32,7 @@ export const ClubFilter = () => {
       value={filters.map(String)}
       onValueChange={(e) => setFilters(e.value.map(Number))}
     >
-      <SelectLabel>Select club</SelectLabel>
+      <SelectLabel>Wybierz lokalizację</SelectLabel>
       <SelectTrigger>
         <SelectValueText placeholder="Club" />
       </SelectTrigger>

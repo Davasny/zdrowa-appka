@@ -31,11 +31,12 @@ export type ExerciseClassFull = ExerciseClassSimple & {
 };
 
 type ExerciseClassState =
-  | "to_be_standby"
-  | "to_be_booked"
-  | "to_be_notify"
-  | "booked"
-  | string;
+  | "to_be_standby" // you can sign up for reservation list
+  | "standby" // you are signed up for reservation list
+  | "to_be_booked" // you can sign up for class
+  | "booked" // you are signed up for class
+  | "to_be_notify" // you can get notification when signup becomes available
+  | "notify"; // you will get notification when signup becomes available
 
 export interface ExerciseClassesResponse {
   fav_instructors: Array<Instructor["id"]>;
@@ -100,4 +101,32 @@ export interface BookExerciseClassResponse {
     message: "success";
     status: "booked";
   };
+}
+
+export interface ExerciseClassDetails {
+  id: number;
+  location: Club["id"];
+  duration: ExerciseClassApi["duration"];
+  date: DateString;
+  classType: ClassType["id"];
+  attendeesCount: number;
+  attendeesLimit: number;
+  category: Category["id"];
+  room: string;
+  day_of_week: string;
+  start_time: `${number}:${number}`;
+  end_time: `${number}:${number}`;
+  coach: Instructor["id"];
+}
+
+export interface ExerciseClassDetailsResponse {
+  fav_instructors: Array<Instructor["id"]>;
+  fav_class_types: Array<ClassType["id"]>;
+  fav_clubs: Array<Club["id"]>;
+  def: ExerciseClassDetails;
+  rating: {
+    amt: number;
+    value: number;
+  };
+  state: ExerciseClassState;
 }

@@ -11,6 +11,7 @@ import {
   BookOrCancelExerciseClassPayload,
   CancelExerciseClassPayload,
   ExerciseClassApi,
+  ExerciseClassDetailsResponse,
   ExerciseClassesPayload,
   ExerciseClassesResponse,
   ExerciseClassFull,
@@ -260,6 +261,17 @@ export class ZdrofitClient {
     });
 
     return fullClasses;
+  }
+
+  async getExerciseClassesDetails(
+    clasId: number,
+  ): Promise<ExerciseClassDetailsResponse> {
+    return await this.client
+      .url(
+        `/api-service/v2/with_auth/class?id=${clasId}&parent_view=class_details`,
+      )
+      .get()
+      .json<ExerciseClassDetailsResponse>();
   }
 
   private async getPaginatedData<T>(pages: Path[]): Promise<T[]> {
