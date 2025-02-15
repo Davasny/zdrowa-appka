@@ -1,5 +1,9 @@
 import { ExerciseClassSimple } from "@/zdrofit/types/exerciseClasses";
-import { useGetClassTypes, useGetClubs } from "@/features/planner/api/useApi";
+import {
+  useGetClassTypes,
+  useGetClubs,
+  useGetUserClasses,
+} from "@/features/planner/api/useApi";
 import { Flex, Text } from "@chakra-ui/react";
 
 export const ClassRow = ({
@@ -9,16 +13,20 @@ export const ClassRow = ({
 }) => {
   const { map: classTypes } = useGetClassTypes();
   const { map: clubs } = useGetClubs();
+  const { map: userClasses } = useGetUserClasses();
 
-  let classType = classTypes.get(simpleClass.classType)?.name || "-";
-  let location = clubs.get(simpleClass.location)?.name || "-";
+  const classType = classTypes.get(simpleClass.classType)?.name || "-";
+  const location = clubs.get(simpleClass.location)?.name || "-";
+
+  const isBooked = userClasses.has(simpleClass.id);
 
   return (
     <Flex
       p={1}
       flexDirection="column"
-      border="1px solid"
-      borderColor="gray.200"
+      border="solid"
+      borderWidth={isBooked ? 2 : 1}
+      borderColor={isBooked ? "orange.400" : "gray.200"}
       rounded="md"
     >
       <Text fontSize="xs" fontWeight="bold">

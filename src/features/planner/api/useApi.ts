@@ -14,7 +14,7 @@ export const useGetClassTypes = () => useApiClient<ClassType>("/class-types");
 export const useGetCategories = () => useApiClient<Category>("/categories");
 export const useGetClubs = () => useApiClient<Club>("/clubs");
 export const useGetUserClasses = () =>
-  useApiClient<Instructor>("/user-classes");
+  useApiClient<ExerciseClassSimple>("/user-classes");
 
 export const useFindClasses = (date: string) => {
   return useQuery<ExerciseClassSimple[]>({
