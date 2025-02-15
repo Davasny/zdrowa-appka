@@ -1,7 +1,7 @@
 import wretch, { Wretch } from "wretch";
 import { AccessToken, LoginPayload, LoginResponse } from "./types/login";
 import { PaginationResponse, Path } from "./types/pagination";
-import { Club, ClubsResponse } from "./types/clubs";
+import { Club } from "./types/clubs";
 import { Instructor } from "./types/instructors";
 import { ClassType } from "./types/classTypes";
 import { Category } from "./types/categories";
@@ -10,11 +10,11 @@ import {
   BookExerciseClassResponse,
   BookOrCancelExerciseClassPayload,
   CancelExerciseClassPayload,
-  ExerciseClassSimple,
   ExerciseClassApi,
   ExerciseClassesPayload,
   ExerciseClassesResponse,
   ExerciseClassFull,
+  ExerciseClassSimple,
 } from "./types/exerciseClasses";
 import { DateString } from "./types/common";
 import { UserHistoryPayload, UserHistoryResponse } from "./types/userHistory";
@@ -82,42 +82,60 @@ export class ZdrofitClient {
     return token.access_token;
   }
 
-  async loadPagination(): Promise<PaginationResponse["def_2"]> {
-    const response = await this.client
-      .url("/api-service/v2/with_auth/dict_pagination?parent_view=home")
-      .get()
-      .json<PaginationResponse>();
+  async getPagination(): Promise<PaginationResponse["def_2"]> {
+    const shouldFetch = Object.values(this.pages).some((p) => p.length === 0);
 
-    this.pages = response.def_2;
-    this.pagesPrefix = response.path;
+    if (shouldFetch) {
+      const response = await this.client
+        .url("/api-service/v2/with_auth/dict_pagination?parent_view=home")
+        .get()
+        .json<PaginationResponse>();
 
-    return response.def_2;
+      this.pages = response.def_2;
+      this.pagesPrefix = response.path;
+    }
+
+    return this.pages;
   }
 
-  async loadClubs(): Promise<Club[]> {
-    const data = await this.getPaginatedData<Club>(this.pages.clubs);
-    this.clubs = new Map(data.map((c) => [c.id, c]));
-    return data;
+  async getClubs(): Promise<Club[]> {
+    if (this.clubs.size === 0) {
+      const data = await this.getPaginatedData<Club>(this.pages.clubs);
+      this.clubs = new Map(data.map((c) => [c.id, c]));
+    }
+
+    return Array.from(this.clubs.values());
   }
 
-  async loadInstructors(): Promise<Instructor[]> {
-    const data = await this.getPaginatedData<Instructor>(
-      this.pages.instructors,
-    );
-    this.instructors = new Map(data.map((i) => [i.id, i]));
-    return data;
+  async getInstructors(): Promise<Instructor[]> {
+    if (this.instructors.size === 0) {
+      const data = await this.getPaginatedData<Instructor>(
+        this.pages.instructors,
+      );
+      this.instructors = new Map(data.map((i) => [i.id, i]));
+    }
+
+    return Array.from(this.instructors.values());
   }
 
-  async loadClassTypes(): Promise<ClassType[]> {
-    const data = await this.getPaginatedData<ClassType>(this.pages.class_types);
-    this.classTypes = new Map(data.map((t) => [t.id, t]));
-    return data;
+  async getClassTypes(): Promise<ClassType[]> {
+    if (this.classTypes.size === 0) {
+      const data = await this.getPaginatedData<ClassType>(
+        this.pages.class_types,
+      );
+      this.classTypes = new Map(data.map((t) => [t.id, t]));
+    }
+
+    return Array.from(this.classTypes.values());
   }
 
-  async loadCategories(): Promise<Category[]> {
-    const data = await this.getPaginatedData<Category>(this.pages.categories);
-    this.categories = new Map(data.map((c) => [c.id, c]));
-    return data;
+  async getCategories(): Promise<Category[]> {
+    if (this.categories.size === 0) {
+      const data = await this.getPaginatedData<Category>(this.pages.categories);
+      this.categories = new Map(data.map((c) => [c.id, c]));
+    }
+
+    return Array.from(this.categories.values());
   }
 
   async findExerciseClasses(date: DateString): Promise<ExerciseClassSimple[]> {

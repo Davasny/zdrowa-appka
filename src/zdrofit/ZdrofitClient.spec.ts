@@ -35,7 +35,7 @@ describe("Check fetching list of pages", async () => {
     });
     const client = new ZdrofitClient(token);
 
-    const pagination = await client.loadPagination();
+    const pagination = await client.getPagination();
 
     expect(pagination.clubs.length).toBeGreaterThan(0);
     expect(pagination.cards.length).toBeGreaterThan(0);
@@ -58,7 +58,7 @@ describe("Check fetching data from authorized endpoints", async () => {
 
     client = new ZdrofitClient(token);
 
-    await client.loadPagination();
+    await client.getPagination();
   });
 
   const getNextWeekExerciseClasses = async () => {
@@ -79,25 +79,25 @@ describe("Check fetching data from authorized endpoints", async () => {
   };
 
   it("Checks if loadClubs returns list of clubs", async () => {
-    const clubs = await client.loadClubs();
+    const clubs = await client.getClubs();
 
     expect(clubs.length).toBeGreaterThan(0);
   });
 
   it("Checks if loadInstructors returns list of instructors", async () => {
-    const instructors = await client.loadInstructors();
+    const instructors = await client.getInstructors();
 
     expect(instructors.length).toBeGreaterThan(0);
   });
 
   it("Checks if loadClassTypes returns list of instructors", async () => {
-    const classTypes = await client.loadClassTypes();
+    const classTypes = await client.getClassTypes();
 
     expect(classTypes.length).toBeGreaterThan(0);
   });
 
   it("Checks if loadCategories returns list of instructors", async () => {
-    const categories = await client.loadCategories();
+    const categories = await client.getCategories();
 
     expect(categories.length).toBeGreaterThan(0);
   });
