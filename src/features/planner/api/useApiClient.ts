@@ -1,8 +1,12 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import wretch from "wretch";
 
+const API_URL = "http://localhost:3000/api";
+
+export const apiClient = wretch(API_URL);
+
 export const backendFetcher = <T>(path: string) =>
-  wretch("http://localhost:3000/api").get(path).json<T>();
+  apiClient.get(path).json<T>();
 
 type HasId = { id: string | number };
 

@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import type { PageConfig } from "next";
 import { ZdrofitClient } from "@/zdrofit/ZdrofitClient";
-import { object, pipe, regex, string, transform } from "valibot";
+import { number, object, pipe, regex, string, transform } from "valibot";
 import { vValidator } from "@hono/valibot-validator";
 import { DateString } from "@/zdrofit/types/common";
 
@@ -89,5 +89,40 @@ app.get(
     return c.json(data);
   },
 );
+
+const bookClassSchema = object({
+  classId: number(),
+  date: pipe(
+    string(),
+    regex(
+      /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/,
+      "Invalid date format. Must be YYYY-MM-DD",
+    ),
+  ),
+});
+
+app.post("/book-class", vValidator("json", bookClassSchema), async (c) => {
+  const { classId, date } = c.req.valid("json");
+
+  const data = await zdrofitClient.bookOrCancelClass({
+    classId: classId.toString(),
+    date: date as DateString,
+    action: "book",
+  });
+
+  return c.json(data);
+});
+
+app.post("/cancel-class", vValidator("json", bookClassSchema), async (c) => {
+  const { classId, date } = c.req.valid("json");
+
+  const data = await zdrofitClient.bookOrCancelClass({
+    classId: classId.toString(),
+    date: date as DateString,
+    action: "cancel",
+  });
+
+  return c.json(data);
+});
 
 export default handle(app);

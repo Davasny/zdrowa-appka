@@ -21,12 +21,18 @@ import {
 import { useState } from "react";
 import { useAtomValue } from "jotai/index";
 import { filterByNameAtom } from "@/features/planner/atoms/filterAtom";
+import { apiClient } from "@/features/planner/api/useApiClient";
+import dayjs from "dayjs";
+import { queryClient } from "@/pages/_app";
 
 const ClassRowDialogContent = ({
   simpleClass,
 }: {
   simpleClass: ExerciseClassSimple;
 }) => {
+  const [cancelInProgress, setCancelInProgress] = useState(false);
+  const [bookInProgress, setBookInProgress] = useState(false);
+
   const { map: classTypes } = useGetClassTypes();
   const { map: clubs } = useGetClubs();
   const { map: userClasses } = useGetUserClasses();
@@ -43,6 +49,54 @@ const ClassRowDialogContent = ({
 
   const canSignOut =
     simpleClass.state === "booked" || simpleClass.state === "standby";
+
+  const stringDate = dayjs(simpleClass.dateObject).format("YYYY-MM-DD");
+
+  // todo: refactor to single handler
+
+  const handleBook = () => {
+    setBookInProgress(true);
+
+    void apiClient
+      .url("/book-class")
+      .post({
+        classId: simpleClass.id,
+        date: stringDate,
+      })
+      .json()
+      .then(() => {
+        setBookInProgress(false);
+        void queryClient.invalidateQueries({
+          queryKey: ["/find-classes", stringDate],
+        });
+
+        void queryClient.invalidateQueries({
+          queryKey: ["/user-classes"],
+        });
+      });
+  };
+
+  const handleCancel = () => {
+    setCancelInProgress(true);
+
+    void apiClient
+      .url("/cancel-class")
+      .post({
+        classId: simpleClass.id,
+        date: stringDate,
+      })
+      .json()
+      .then(() => {
+        setCancelInProgress(false);
+        void queryClient.invalidateQueries({
+          queryKey: ["/find-classes", stringDate],
+        });
+
+        void queryClient.invalidateQueries({
+          queryKey: ["/user-classes"],
+        });
+      });
+  };
 
   return (
     <DialogContent>
@@ -78,11 +132,21 @@ const ClassRowDialogContent = ({
       </DialogBody>
 
       <DialogFooter justifyContent="space-between">
-        <Button colorPalette="red" disabled={!canSignOut}>
+        <Button
+          colorPalette="red"
+          disabled={!canSignOut}
+          loading={cancelInProgress}
+          onClick={handleCancel}
+        >
           Wypisz
         </Button>
 
-        <Button colorPalette="orange" disabled={canSignOut}>
+        <Button
+          colorPalette="orange"
+          disabled={canSignOut}
+          loading={bookInProgress}
+          onClick={handleBook}
+        >
           Zabookuj
         </Button>
       </DialogFooter>
