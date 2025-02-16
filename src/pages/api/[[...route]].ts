@@ -123,7 +123,7 @@ app.post("/book-class", vValidator("json", bookClassSchema), async (c) => {
         classId,
         date: date as DateString,
       },
-      executionTimestamp: classDate.getTime(),
+      executionTimestamp: classDate.getTime() - 48 * 60 * 60 * 1000,
     });
 
     return c.json({ message: "job created" });

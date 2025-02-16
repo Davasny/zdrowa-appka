@@ -39,18 +39,22 @@ const main = async () => {
 
     const jobs = await s.getPendingJobs();
 
-    console.log("Found pending jobs: ", jobs.length);
+    const jobsToExecute = jobs.filter(
+      (job) => job.executionTimestamp < new Date().getTime() + 5_000,
+    );
 
-    for (const job of jobs) {
-      if (job.executionTimestamp < new Date().getTime() + 5_000) {
-        console.log("Starting job", JSON.stringify(job));
+    console.log(
+      `Pending jobs: ${jobs.length}, to be executed now: ${jobsToExecute.length}`,
+    );
 
-        await s.updateJobState(job.id, "inProgress");
+    for (const job of jobsToExecute) {
+      console.log("Starting job", JSON.stringify(job));
 
-        bookClassJob(job).then(async () => {
-          await s.updateJobState(job.id, "done");
-        });
-      }
+      await s.updateJobState(job.id, "inProgress");
+
+      bookClassJob(job).then(async () => {
+        await s.updateJobState(job.id, "done");
+      });
     }
   }, 2_000);
 };
