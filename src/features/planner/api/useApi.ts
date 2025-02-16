@@ -11,6 +11,7 @@ import {
   ExerciseClassSimple,
 } from "@/zdrofit/types/exerciseClasses";
 import { Club } from "@/zdrofit/types/clubs";
+import { Job } from "@/storage/JobsStorage";
 
 export const useGetInstructors = () => useApiClient<Instructor>("/instructors");
 export const useGetClassTypes = () => useApiClient<ClassType>("/class-types");
@@ -36,3 +37,9 @@ export const useGetClassDetails = (classId: number) => {
       ),
   });
 };
+
+export const useGetPlannedJobs = () =>
+  useQuery({
+    queryKey: ["/planned-jobs"],
+    queryFn: () => backendFetcher<Job[]>("/planned-jobs"),
+  });

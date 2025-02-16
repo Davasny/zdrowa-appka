@@ -1,13 +1,17 @@
-import { Hono } from "hono";
-import { handle } from "hono/vercel";
-import type { PageConfig } from "next";
 import { ZdrofitClient } from "@/zdrofit/ZdrofitClient";
 import { number, object, pipe, regex, string, transform } from "valibot";
 import { vValidator } from "@hono/valibot-validator";
 import { DateString } from "@/zdrofit/types/common";
+import { JobsStorage } from "@/storage/JobsStorage";
+
+import { Hono } from "hono";
+import { handle } from "@hono/node-server/vercel";
+import type { PageConfig } from "next";
 
 export const config: PageConfig = {
-  runtime: "edge",
+  api: {
+    bodyParser: false,
+  },
 };
 
 const app = new Hono().basePath("/api");
@@ -102,25 +106,71 @@ const bookClassSchema = object({
 app.post("/book-class", vValidator("json", bookClassSchema), async (c) => {
   const { classId, date } = c.req.valid("json");
 
-  const data = await zdrofitClient.bookOrCancelClass({
-    classId: classId.toString(),
-    date: date as DateString,
-    action: "book",
-  });
+  const classDetails = await zdrofitClient.getExerciseClassesDetails(classId);
 
-  return c.json(data);
+  if (classDetails.state === "to_be_notify") {
+    // we can sign up for notification so we should create cron which will sign us up
+    const jobStorage = new JobsStorage();
+
+    const classDate = zdrofitClient.convertStringsToDate(
+      classDetails.def.date,
+      classDetails.def.start_time,
+    );
+
+    await jobStorage.createJob({
+      state: "scheduled",
+      class: {
+        classId,
+        date: date as DateString,
+      },
+      executionTimestamp: classDate.getTime(),
+    });
+
+    return c.json({ message: "job created" });
+  } else {
+    try {
+      const zdrofitResponse = await zdrofitClient.bookOrCancelClass({
+        classId: classId.toString(),
+        date: date as DateString,
+        action: "book",
+      });
+
+      return c.json(zdrofitResponse);
+    } catch (e) {
+      let msg = e instanceof Error ? e.message : "unknown";
+      return c.json({ message: `Error occurred: ${msg}` }, 400);
+    }
+  }
 });
 
 app.post("/cancel-class", vValidator("json", bookClassSchema), async (c) => {
   const { classId, date } = c.req.valid("json");
 
-  const data = await zdrofitClient.bookOrCancelClass({
-    classId: classId.toString(),
-    date: date as DateString,
-    action: "cancel",
-  });
+  const jobStorage = new JobsStorage();
+  const scheduledJobs = await jobStorage.getPendingJobs();
 
-  return c.json(data);
+  const scheduledJob = scheduledJobs.find(
+    (job) => job.class.classId === classId,
+  );
+
+  if (scheduledJob) {
+    await jobStorage.updateJobState(scheduledJob.id, "canceled");
+    return c.json({ message: "job canceled" });
+  } else {
+    const data = await zdrofitClient.bookOrCancelClass({
+      classId: classId.toString(),
+      date: date as DateString,
+      action: "cancel",
+    });
+
+    return c.json(data);
+  }
+});
+
+app.get("/planned-jobs", async (c) => {
+  const jobStorage = new JobsStorage();
+  const jobs = await jobStorage.getPendingJobs();
+  return c.json(jobs);
 });
 
 app.post("/reset-cache", async (c) => {

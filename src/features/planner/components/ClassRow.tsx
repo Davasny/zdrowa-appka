@@ -4,6 +4,7 @@ import {
   useGetClassTypes,
   useGetClubs,
   useGetInstructors,
+  useGetPlannedJobs,
   useGetUserClasses,
 } from "@/features/planner/api/useApi";
 import { Button, DialogBackdrop, Flex, Stat, Text } from "@chakra-ui/react";
@@ -24,6 +25,7 @@ import { filterByNameAtom } from "@/features/planner/atoms/filterAtom";
 import { apiClient } from "@/features/planner/api/useApiClient";
 import dayjs from "dayjs";
 import { queryClient } from "@/pages/_app";
+import { toaster } from "@/components/ui/toaster";
 
 const ClassRowDialogContent = ({
   simpleClass,
@@ -34,68 +36,69 @@ const ClassRowDialogContent = ({
   const [bookInProgress, setBookInProgress] = useState(false);
 
   const { map: classTypes } = useGetClassTypes();
-  const { map: clubs } = useGetClubs();
-  const { map: userClasses } = useGetUserClasses();
+
   const { map: instructors, isLoading: isLoadingInstructors } =
     useGetInstructors();
+
   const { data: classDetails, isLoading: isLoadingClassDetails } =
     useGetClassDetails(simpleClass.id);
 
+  const { data: plannedJobs } = useGetPlannedJobs();
+
+  const isPlannedToBook = plannedJobs?.some(
+    (job) => job.class.classId === simpleClass.id,
+  );
+
   const classType = classTypes.get(simpleClass.classType)?.name || "-";
-  const location = clubs.get(simpleClass.location)?.name || "-";
-  const isBooked = userClasses.has(simpleClass.id);
 
   const coach = instructors.get(simpleClass.coach)?.name || "-";
 
   const canSignOut =
-    simpleClass.state === "booked" || simpleClass.state === "standby";
+    simpleClass.state === "booked" ||
+    simpleClass.state === "standby" ||
+    isPlannedToBook;
 
   const stringDate = dayjs(simpleClass.dateObject).format("YYYY-MM-DD");
 
-  // todo: refactor to single handler
-  // todo: show error message
-
-  const handleBook = () => {
+  const handleBookOrCacl = (action: "book" | "cancel") => {
+    const url = action === "book" ? "/book-class" : "/cancel-class";
     setBookInProgress(true);
 
     void apiClient
-      .url("/book-class")
+      .url(url)
       .post({
         classId: simpleClass.id,
         date: stringDate,
       })
       .json()
-      .then(() => {
+      .then(async () => {
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: ["/find-classes", stringDate],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ["/user-classes"],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ["/planned-jobs"],
+          }),
+        ]);
+
+        toaster.create({
+          title: `${action}ed`,
+          type: "success",
+        });
+
         setBookInProgress(false);
-        void queryClient.invalidateQueries({
-          queryKey: ["/find-classes", stringDate],
-        });
-
-        void queryClient.invalidateQueries({
-          queryKey: ["/user-classes"],
-        });
-      });
-  };
-
-  const handleCancel = () => {
-    setCancelInProgress(true);
-
-    void apiClient
-      .url("/cancel-class")
-      .post({
-        classId: simpleClass.id,
-        date: stringDate,
       })
-      .json()
-      .then(() => {
-        setCancelInProgress(false);
-        void queryClient.invalidateQueries({
-          queryKey: ["/find-classes", stringDate],
+      .catch((e) => {
+        toaster.create({
+          title: `Failed to ${action}`,
+          type: "error",
+          description: e.message,
         });
 
-        void queryClient.invalidateQueries({
-          queryKey: ["/user-classes"],
-        });
+        setBookInProgress(false);
       });
   };
 
@@ -109,7 +112,10 @@ const ClassRowDialogContent = ({
       <DialogBody>
         <Stat.Root>
           <Stat.Label>Status</Stat.Label>
-          <Stat.ValueText>{simpleClass.state}</Stat.ValueText>
+          <Stat.ValueText>
+            {simpleClass.state}
+            {isPlannedToBook ? <> (planned)</> : null}
+          </Stat.ValueText>
         </Stat.Root>
 
         <Stat.Root>
@@ -137,7 +143,7 @@ const ClassRowDialogContent = ({
           colorPalette="red"
           disabled={!canSignOut}
           loading={cancelInProgress}
-          onClick={handleCancel}
+          onClick={() => handleBookOrCacl("cancel")}
         >
           Wypisz
         </Button>
@@ -146,7 +152,7 @@ const ClassRowDialogContent = ({
           colorPalette="orange"
           disabled={canSignOut}
           loading={bookInProgress}
-          onClick={handleBook}
+          onClick={() => handleBookOrCacl("book")}
         >
           Zabookuj
         </Button>
@@ -166,11 +172,15 @@ export const ClassRow = ({
   const { map: classTypes } = useGetClassTypes();
   const { map: clubs } = useGetClubs();
   const { map: userClasses } = useGetUserClasses();
+  const { data: plannedJobs } = useGetPlannedJobs();
 
   const className = classTypes.get(simpleClass.classType)?.name || "-";
   const location = clubs.get(simpleClass.location)?.name || "-";
 
   const isBooked = userClasses.has(simpleClass.id);
+  const isPlannedToBook = plannedJobs?.some(
+    (job) => job.class.classId === simpleClass.id,
+  );
 
   const isVisible =
     filterByName.length === 0 ||
@@ -187,9 +197,9 @@ export const ClassRow = ({
         <Flex
           p={1}
           flexDirection="column"
-          border="solid"
-          borderWidth={isBooked ? 2 : 1}
-          borderColor={isBooked ? "orange.400" : "gray.200"}
+          borderStyle={isPlannedToBook ? "dashed" : "solid"}
+          borderWidth={isBooked || isPlannedToBook ? 2 : 1}
+          borderColor={isBooked || isPlannedToBook ? "orange.400" : "gray.200"}
           rounded="md"
           _hover={{ shadow: "md" }}
           color={simpleClass.state === "to_be_standby" ? "gray.500" : undefined}

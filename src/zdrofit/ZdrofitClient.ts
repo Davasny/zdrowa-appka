@@ -17,7 +17,7 @@ import {
   ExerciseClassFull,
   ExerciseClassSimple,
 } from "./types/exerciseClasses";
-import { DateString } from "./types/common";
+import { DateString, HourString } from "./types/common";
 import { UserHistoryPayload, UserHistoryResponse } from "./types/userHistory";
 import { retry } from "wretch/middlewares";
 
@@ -334,8 +334,12 @@ export class ZdrofitClient {
   ): ExerciseClassSimple {
     return {
       ...apiClass,
-      dateObject: new Date(`${apiClass.date}T${apiClass.start_time}:00`),
+      dateObject: this.convertStringsToDate(apiClass.date, apiClass.start_time),
       state: states[apiClass.id],
     };
+  }
+
+  convertStringsToDate(date: DateString, hour: HourString): Date {
+    return new Date(`${date}T${hour}:00`);
   }
 }

@@ -6,7 +6,7 @@ import { ULID, ulid } from "ulidx";
 export interface Job {
   id: ULID;
   executionTimestamp: number;
-  state: "scheduled" | "done" | "inProgress";
+  state: "scheduled" | "done" | "inProgress" | "canceled";
   class: {
     classId: ExerciseClassSimple["id"];
     date: DateString;
@@ -20,6 +20,13 @@ export class JobsStorage {
 
   // Helper method: read jobs from the storage file.
   private async readJobsFromFile(): Promise<Job[]> {
+    try {
+      await fs.access(this.storageFilePath);
+    } catch (e) {
+      // if not, create it
+      await fs.writeFile(this.storageFilePath, "[]", "utf8");
+    }
+
     const data = await fs.readFile(this.storageFilePath, "utf8");
     return JSON.parse(data) as Job[];
   }
