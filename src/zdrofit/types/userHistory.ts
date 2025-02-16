@@ -1,5 +1,5 @@
-import { Instructor } from "./instructors";
 import { Club } from "./clubs";
+import { Instructor } from "./instructors";
 
 export interface UserHistoryPayload {
   types: Array<"device" | "club">;

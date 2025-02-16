@@ -2,16 +2,16 @@ import {
   backendFetcher,
   useApiClient,
 } from "@/features/planner/api/useApiClient";
-import { Instructor } from "@/zdrofit/types/instructors";
-import { ClassType } from "@/zdrofit/types/classTypes";
+import { Job } from "@/storage/JobsStorage";
 import { Category } from "@/zdrofit/types/categories";
-import { useQuery } from "@tanstack/react-query";
+import { ClassType } from "@/zdrofit/types/classTypes";
+import { Club } from "@/zdrofit/types/clubs";
 import {
   ExerciseClassDetailsResponse,
   ExerciseClassSimple,
 } from "@/zdrofit/types/exerciseClasses";
-import { Club } from "@/zdrofit/types/clubs";
-import { Job } from "@/storage/JobsStorage";
+import { Instructor } from "@/zdrofit/types/instructors";
+import { useQuery } from "@tanstack/react-query";
 
 export const useGetInstructors = () => useApiClient<Instructor>("/instructors");
 export const useGetClassTypes = () => useApiClient<ClassType>("/class-types");

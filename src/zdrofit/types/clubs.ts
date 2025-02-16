@@ -1,6 +1,6 @@
 import { Card } from "./cards";
-import { Instructor } from "./instructors";
 import { DateString, HourString, Timestamp } from "./common";
+import { Instructor } from "./instructors";
 
 interface Location {
   street: string;

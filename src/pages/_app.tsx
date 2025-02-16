@@ -1,8 +1,8 @@
-import type { AppProps } from "next/app";
 import { Provider } from "@/components/ui/provider";
-import Head from "next/head";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { AppProps } from "next/app";
+import Head from "next/head";
 
 export const queryClient = new QueryClient();
 

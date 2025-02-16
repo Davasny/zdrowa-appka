@@ -1,16 +1,16 @@
-import { ExerciseClassSimple } from "@/zdrofit/types/exerciseClasses";
+import { DialogRoot, DialogTrigger } from "@/components/ui/dialog";
 import {
   useGetClassTypes,
   useGetClubs,
   useGetPlannedJobs,
   useGetUserClasses,
 } from "@/features/planner/api/useApi";
-import { DialogBackdrop, Flex, Text } from "@chakra-ui/react";
-import { DialogRoot, DialogTrigger } from "@/components/ui/dialog";
-import { useState } from "react";
-import { useAtomValue } from "jotai/index";
 import { filterByNameAtom } from "@/features/planner/atoms/filterAtom";
 import { ClassDetails } from "@/features/planner/components/ClassDetails";
+import { ExerciseClassSimple } from "@/zdrofit/types/exerciseClasses";
+import { DialogBackdrop, Flex, Text } from "@chakra-ui/react";
+import { useAtomValue } from "jotai/index";
+import { useState } from "react";
 
 export const ClassRow = ({
   simpleClass,

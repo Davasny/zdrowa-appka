@@ -1,7 +1,3 @@
-import { useGetClubs } from "@/features/planner/api/useApi";
-import { createListCollection } from "@chakra-ui/react";
-import { useAtom } from "jotai/index";
-import { filterByLocationAtom } from "@/features/planner/atoms/filterAtom";
 import {
   SelectContent,
   SelectItem,
@@ -10,6 +6,10 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "@/components/ui/select";
+import { useGetClubs } from "@/features/planner/api/useApi";
+import { filterByLocationAtom } from "@/features/planner/atoms/filterAtom";
+import { createListCollection } from "@chakra-ui/react";
+import { useAtom } from "jotai/index";
 
 export const FilterByLocation = () => {
   const { data: clubs } = useGetClubs();

@@ -1,5 +1,5 @@
-import { Flex } from "@chakra-ui/react";
 import { Planner } from "@/features/planner/components/Planner";
+import { Flex } from "@chakra-ui/react";
 
 export default function Home() {
   return (

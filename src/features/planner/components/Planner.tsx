@@ -1,14 +1,14 @@
-import { Button, Flex, Table, Text } from "@chakra-ui/react";
-import { useState } from "react";
-import dayjs from "dayjs";
 import { FilterByLocation } from "@/features/planner/components/FilterByLocation";
+import { FilterByName } from "@/features/planner/components/FilterByName";
 import { PlannerCell } from "@/features/planner/components/PlannerCell";
-import { getStartOfWeek } from "@/features/planner/utils/getStartOfWeek";
+import { RefreshButton } from "@/features/planner/components/RefreshButton";
+import { DAYS } from "@/features/planner/consts/i18n";
 import { addDays } from "@/features/planner/utils/addDays";
 import { generateFullHours } from "@/features/planner/utils/generateFullHours";
-import { DAYS } from "@/features/planner/consts/i18n";
-import { FilterByName } from "@/features/planner/components/FilterByName";
-import { RefreshButton } from "@/features/planner/components/RefreshButton";
+import { getStartOfWeek } from "@/features/planner/utils/getStartOfWeek";
+import { Button, Flex, Table, Text } from "@chakra-ui/react";
+import dayjs from "dayjs";
+import { useState } from "react";
 
 export const Planner = () => {
   const [weekStart, setWeekStart] = useState<Date>(getStartOfWeek(new Date()));

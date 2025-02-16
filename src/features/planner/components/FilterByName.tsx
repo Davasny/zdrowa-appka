@@ -1,7 +1,7 @@
-import { useAtom } from "jotai/index";
-import { filterByNameAtom } from "@/features/planner/atoms/filterAtom";
 import { Field } from "@/components/ui/field";
+import { filterByNameAtom } from "@/features/planner/atoms/filterAtom";
 import { Input } from "@chakra-ui/react";
+import { useAtom } from "jotai/index";
 
 export const FilterByName = () => {
   const [searchText, setSearchText] = useAtom(filterByNameAtom);

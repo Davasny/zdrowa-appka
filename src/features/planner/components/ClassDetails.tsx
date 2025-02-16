@@ -1,19 +1,4 @@
 import {
-  ExerciseClassSimple,
-  ExerciseClassStateEnum,
-} from "@/zdrofit/types/exerciseClasses";
-import { useState } from "react";
-import {
-  useGetClassDetails,
-  useGetClassTypes,
-  useGetInstructors,
-  useGetPlannedJobs,
-} from "@/features/planner/api/useApi";
-import dayjs from "dayjs";
-import { apiClient } from "@/features/planner/api/useApiClient";
-import { queryClient } from "@/pages/_app";
-import { toaster } from "@/components/ui/toaster";
-import {
   DialogBody,
   DialogCloseTrigger,
   DialogContent,
@@ -21,8 +6,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button, DataList } from "@chakra-ui/react";
+import { toaster } from "@/components/ui/toaster";
+import {
+  useGetClassDetails,
+  useGetClassTypes,
+  useGetInstructors,
+  useGetPlannedJobs,
+} from "@/features/planner/api/useApi";
+import { apiClient } from "@/features/planner/api/useApiClient";
 import { ClassIntensityStatus } from "@/features/planner/components/ClassIntensityStatus";
+import { queryClient } from "@/pages/_app";
+import {
+  ExerciseClassSimple,
+  ExerciseClassStateEnum,
+} from "@/zdrofit/types/exerciseClasses";
+import { Button, DataList } from "@chakra-ui/react";
+import dayjs from "dayjs";
+import { useState } from "react";
 
 export const ClassDetails = ({
   simpleClass,

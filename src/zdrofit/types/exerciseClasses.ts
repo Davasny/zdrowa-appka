@@ -1,8 +1,8 @@
+import { Category } from "./categories";
+import { ClassType } from "./classTypes";
 import { Club } from "./clubs";
 import { DateString, HourString } from "./common";
-import { ClassType } from "./classTypes";
 import { Instructor } from "./instructors";
-import { Category } from "./categories";
 
 type DurationTimes = 15 | 20 | 50 | 55 | 60 | 90;
 

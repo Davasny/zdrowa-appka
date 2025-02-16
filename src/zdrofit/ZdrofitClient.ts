@@ -1,10 +1,9 @@
 import wretch, { Wretch } from "wretch";
-import { AccessToken, LoginPayload, LoginResponse } from "./types/login";
-import { PaginationResponse, Path } from "./types/pagination";
-import { Club } from "./types/clubs";
-import { Instructor } from "./types/instructors";
-import { ClassType } from "./types/classTypes";
+import { retry } from "wretch/middlewares";
 import { Category } from "./types/categories";
+import { ClassType } from "./types/classTypes";
+import { Club } from "./types/clubs";
+import { DateString, HourString } from "./types/common";
 import {
   BookExerciseClassPayload,
   BookExerciseClassResponse,
@@ -17,9 +16,10 @@ import {
   ExerciseClassFull,
   ExerciseClassSimple,
 } from "./types/exerciseClasses";
-import { DateString, HourString } from "./types/common";
+import { Instructor } from "./types/instructors";
+import { AccessToken, LoginPayload, LoginResponse } from "./types/login";
+import { PaginationResponse, Path } from "./types/pagination";
 import { UserHistoryPayload, UserHistoryResponse } from "./types/userHistory";
-import { retry } from "wretch/middlewares";
 
 const ZDROFIT_API_URL = "https://appfitness.zdrofit.pl";
 

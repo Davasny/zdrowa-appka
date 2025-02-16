@@ -1,8 +1,8 @@
-import dayjs from "dayjs";
 import { useFindClasses } from "@/features/planner/api/useApi";
-import { useAtomValue } from "jotai/index";
 import { filterByLocationAtom } from "@/features/planner/atoms/filterAtom";
 import { Flex, Table } from "@chakra-ui/react";
+import dayjs from "dayjs";
+import { useAtomValue } from "jotai/index";
 
 import { ClassRow } from "@/features/planner/components/ClassRow";
 

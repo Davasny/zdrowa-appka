@@ -1,6 +1,6 @@
-import { promises as fs } from "fs";
 import { DateString } from "@/zdrofit/types/common";
 import { ExerciseClassSimple } from "@/zdrofit/types/exerciseClasses";
+import { promises as fs } from "fs";
 import { ULID, ulid } from "ulidx";
 
 export interface Job {

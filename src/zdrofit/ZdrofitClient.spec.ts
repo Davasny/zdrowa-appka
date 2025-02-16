@@ -6,8 +6,8 @@ import {
   getNthNextDay,
 } from "./utils";
 
-import "dotenv/config";
 import { LoginPayload } from "@/zdrofit/types/login";
+import "dotenv/config";
 
 const username = process.env.ZDROFIT_USERNAME;
 const password = process.env.ZDROFIT_PASSWORD;
