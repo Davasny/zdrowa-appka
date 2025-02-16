@@ -20,7 +20,7 @@ import {
   ExerciseClassSimple,
   ExerciseClassStateEnum,
 } from "@/zdrofit/types/exerciseClasses";
-import { Button, DataList } from "@chakra-ui/react";
+import { Badge, Button, DataList, Flex } from "@chakra-ui/react";
 import dayjs from "dayjs";
 import { useState } from "react";
 
@@ -129,7 +129,10 @@ export const ClassDetails = ({
     <DialogContent>
       <DialogCloseTrigger />
       <DialogHeader>
-        <DialogTitle>{classType?.name || "-"}</DialogTitle>
+        <DialogTitle as={Flex} gap={4}>
+          {classType?.name || "-"}
+          <Badge>{simpleClass.id}</Badge>
+        </DialogTitle>
       </DialogHeader>
 
       <DialogBody>
