@@ -7,6 +7,7 @@ import {
 } from "./utils";
 
 import "dotenv/config";
+import { LoginPayload } from "@/zdrofit/types/login";
 
 const username = process.env.ZDROFIT_USERNAME;
 const password = process.env.ZDROFIT_PASSWORD;
@@ -14,26 +15,39 @@ const password = process.env.ZDROFIT_PASSWORD;
 assert(username, "Username is not defined");
 assert(password, "Password is not defined");
 
-describe("Check login flow", async () => {
-  it("Checks if it's possible to get auth token", async () => {
-    const token = await ZdrofitClient.getAccessToken({
-      username,
-      password,
-      network_id: "mfp",
-    });
+const loginPayload: LoginPayload = {
+  username,
+  password,
+  network_id: "mfp",
+};
 
-    expect(token.length).toBe(73);
+const getClient = async () => await ZdrofitClient.getInstance(loginPayload);
+
+describe("Check login flow", async () => {
+  it("Checks if it's possible to authorize", async () => {
+    const client = await getClient();
+
+    const token = client.getToken();
+
+    expect(token).toBeDefined();
+    expect(token?.length).toBe(73);
+  });
+
+  it("Checks if client is able to refresh auth token", async () => {
+    const client1 = new ZdrofitClient(loginPayload);
+    await client1.authorize();
+
+    const client2 = new ZdrofitClient(loginPayload);
+    await client2.authorize();
+
+    await client1.getPagination(); // this request is being retried by wretch middleware
+    await client1.getCategories(); // make sure new token is valid
   });
 });
 
 describe("Check fetching list of pages", async () => {
   it("Checks if pagination endpoint returns data", async () => {
-    const token = await ZdrofitClient.getAccessToken({
-      username,
-      password,
-      network_id: "mfp",
-    });
-    const client = new ZdrofitClient(token);
+    const client = await getClient();
 
     const pagination = await client.getPagination();
 
@@ -46,18 +60,10 @@ describe("Check fetching list of pages", async () => {
 });
 
 describe("Check fetching data from authorized endpoints", async () => {
-  let token: string;
   let client: ZdrofitClient;
 
   beforeAll(async () => {
-    token = await ZdrofitClient.getAccessToken({
-      username,
-      password,
-      network_id: "mfp",
-    });
-
-    client = new ZdrofitClient(token);
-
+    client = await getClient();
     await client.getPagination();
   });
 

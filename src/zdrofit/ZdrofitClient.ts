@@ -19,6 +19,7 @@ import {
 } from "./types/exerciseClasses";
 import { DateString } from "./types/common";
 import { UserHistoryPayload, UserHistoryResponse } from "./types/userHistory";
+import { retry } from "wretch/middlewares";
 
 const ZDROFIT_API_URL = "https://appfitness.zdrofit.pl";
 
@@ -33,10 +34,12 @@ const DEVICE_SPECIFIC_HEADERS = {
 };
 
 export class ZdrofitClient {
-  private readonly client: Wretch;
+  private static instance: ZdrofitClient;
 
-  private accessToken: AccessToken;
-  private networkId: LoginPayload["network_id"];
+  private client: Wretch;
+
+  private loginData: LoginPayload;
+  private accessToken: AccessToken | null = null;
 
   private pages: PaginationResponse["def_2"];
   private pagesPrefix: PaginationResponse["path"];
@@ -46,17 +49,22 @@ export class ZdrofitClient {
   private classTypes: Map<ClassType["id"], ClassType>;
   private categories: Map<Category["id"], Category>;
 
-  constructor(
-    accessToken: AccessToken,
-    networkId: LoginPayload["network_id"] = "mfp",
-  ) {
-    this.accessToken = accessToken;
-    this.networkId = networkId;
+  constructor(loginData: LoginPayload) {
+    this.loginData = loginData;
 
-    this.client = wretch(ZDROFIT_API_URL).headers({
-      authorization: `Bearer ${accessToken}`,
-      ...DEVICE_SPECIFIC_HEADERS,
-    });
+    this.client = wretch(ZDROFIT_API_URL).middlewares([
+      retry({
+        maxAttempts: 3,
+        onRetry: async (args) => {
+          await this.authorize();
+
+          // need to update auth header only for retried request
+          args.options.headers = this.getHeaders();
+
+          return args;
+        },
+      }),
+    ]);
 
     this.pagesPrefix = "/static/authorized/";
     this.pages = {
@@ -73,6 +81,41 @@ export class ZdrofitClient {
     this.categories = new Map();
   }
 
+  static async getInstance(login: LoginPayload): Promise<ZdrofitClient> {
+    if (!ZdrofitClient.instance) {
+      ZdrofitClient.instance = new ZdrofitClient(login);
+      await ZdrofitClient.instance.authorize();
+    }
+
+    return ZdrofitClient.instance;
+  }
+
+  async authorize(): Promise<void> {
+    const token = await wretch(ZDROFIT_API_URL)
+      .url("/api-service/v2/without_auth/login?parent_view=login")
+      .headers(DEVICE_SPECIFIC_HEADERS)
+      .post(this.loginData)
+      .json<LoginResponse>();
+
+    this.accessToken = token.access_token;
+
+    this.client = this.client.headers(this.getHeaders());
+  }
+
+  private getHeaders() {
+    return {
+      authorization: `Bearer ${this.accessToken}`,
+      ...DEVICE_SPECIFIC_HEADERS,
+    };
+  }
+
+  getToken(): AccessToken | null {
+    return this.accessToken;
+  }
+
+  /**
+   * @deprecated
+   * */
   static async getAccessToken(payload: LoginPayload): Promise<AccessToken> {
     const token = await wretch(ZDROFIT_API_URL)
       .url("/api-service/v2/without_auth/login?parent_view=login")
@@ -285,7 +328,7 @@ export class ZdrofitClient {
     let data: T[] = [];
 
     for (const page of pages) {
-      const url = `${this.pagesPrefix}${this.networkId}:${page}?access_token=${this.accessToken}`;
+      const url = `${this.pagesPrefix}${this.loginData.network_id}:${page}?access_token=${this.accessToken}`;
 
       const response = await this.client
         .url(url)

@@ -23,13 +23,11 @@ if (!password) {
   throw new Error("Password is not defined");
 }
 
-const accessToken = await ZdrofitClient.getAccessToken({
+const zdrofitClient = await ZdrofitClient.getInstance({
   username,
   password,
   network_id: "mfp",
 });
-
-const zdrofitClient = new ZdrofitClient(accessToken);
 await zdrofitClient.getPagination();
 
 const findClassesSchema = object({
