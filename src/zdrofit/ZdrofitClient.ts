@@ -113,19 +113,6 @@ export class ZdrofitClient {
     return this.accessToken;
   }
 
-  /**
-   * @deprecated
-   * */
-  static async getAccessToken(payload: LoginPayload): Promise<AccessToken> {
-    const token = await wretch(ZDROFIT_API_URL)
-      .url("/api-service/v2/without_auth/login?parent_view=login")
-      .headers(DEVICE_SPECIFIC_HEADERS)
-      .post(payload)
-      .json<LoginResponse>();
-
-    return token.access_token;
-  }
-
   async getPagination(): Promise<PaginationResponse["def_2"]> {
     const shouldFetch = Object.values(this.pages).some((p) => p.length === 0);
 
