@@ -1,8 +1,9 @@
 import { atomWithStorage } from "jotai/utils";
+import { atom } from "jotai";
 
 export const filterByLocationAtom = atomWithStorage<number[]>(
   "filterByLocationAtom",
   [],
 );
 
-export const filterByNameAtom = atomWithStorage<string>("filterByNameAtom", "");
+export const filterByNameAtom = atom<string>("");

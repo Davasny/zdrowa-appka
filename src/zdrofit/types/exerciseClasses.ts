@@ -30,13 +30,16 @@ export type ExerciseClassFull = ExerciseClassSimple & {
   clubObject: Club | null;
 };
 
-type ExerciseClassState =
-  | "to_be_standby" // you can sign up for reservation list
-  | "standby" // you are signed up for reservation list
-  | "to_be_booked" // you can sign up for class
-  | "booked" // you are signed up for class
-  | "to_be_notify" // you can get notification when signup becomes available
-  | "notify"; // you will get notification when signup becomes available
+type ExerciseClassState = keyof typeof ExerciseClassStateEnum;
+
+export enum ExerciseClassStateEnum {
+  to_be_standby = "Zapisz się na listę rezerwową",
+  standby = "Na liście rezerwowej",
+  to_be_booked = "Zapisz się",
+  booked = "Zapisany",
+  to_be_notify = "Powiadom mnie",
+  notify = "Powiadomiono",
+}
 
 export interface ExerciseClassesResponse {
   fav_instructors: Array<Instructor["id"]>;

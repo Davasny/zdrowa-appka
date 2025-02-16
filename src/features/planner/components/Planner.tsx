@@ -33,8 +33,8 @@ export const Planner = () => {
     <Flex flexDirection="column" w="100%" gap={2}>
       <Flex gap={2}>
         <FilterByLocation />
-        <FilterByName/>
-        <RefreshButton/>
+        <FilterByName />
+        <RefreshButton />
       </Flex>
 
       <Flex justifyContent="space-between">
@@ -42,11 +42,11 @@ export const Planner = () => {
           Poprzedni tydzień
         </Button>
 
-        <Button onClick={handleToday} variant="subtle">
+        <Button onClick={handleToday} size="sm" variant="subtle">
           Dzisiaj
         </Button>
 
-        <Button onClick={handleNextWeek} variant="subtle">
+        <Button onClick={handleNextWeek} size="sm" variant="subtle">
           Następny tydzień
         </Button>
       </Flex>

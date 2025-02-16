@@ -12,10 +12,10 @@ interface ClassLevel {
   slug: string;
 }
 
-interface ClassIntensity {
+export interface ClassIntensity {
   id: number;
-  name: string;
-  slug: string;
+  name: "niska" | "średnia" | "wysoka" | "ekstremalna";
+  slug: "low" | "medium" | "high" | "extreme";
 }
 
 interface ClassTarget {
