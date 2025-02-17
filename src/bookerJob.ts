@@ -20,7 +20,10 @@ const bookClassJob = async (job: Job) => {
     network_id: "mfp",
   });
 
-  console.log("Booking class", JSON.stringify(job.class));
+  console.log(
+    `[${new Date().toISOString()}] Booking class`,
+    JSON.stringify(job.class),
+  );
 
   await zdrofitClient.bookOrCancelClass({
     action: "book",
@@ -28,14 +31,17 @@ const bookClassJob = async (job: Job) => {
     classId: job.class.classId.toString(),
   });
 
-  console.log("Booked", JSON.stringify(job.class));
+  console.log(
+    `[${new Date().toISOString()}] Booked`,
+    JSON.stringify(job.class),
+  );
 };
 
 const main = async () => {
   const s = new JobsStorage();
 
   setInterval(async () => {
-    console.log("Checking for pending jobs");
+    console.log(`[${new Date().toISOString()}] Checking for pending jobs`);
 
     const jobs = await s.getPendingJobs();
 
@@ -44,11 +50,14 @@ const main = async () => {
     );
 
     console.log(
-      `Pending jobs: ${jobs.length}, to be executed now: ${jobsToExecute.length}`,
+      `[${new Date().toISOString()}] Pending jobs: ${jobs.length}, to be executed now: ${jobsToExecute.length}`,
     );
 
     for (const job of jobsToExecute) {
-      console.log("Starting job", JSON.stringify(job));
+      console.log(
+        `[${new Date().toISOString()}] Starting job:`,
+        JSON.stringify(job),
+      );
 
       await s.updateJobState(job.id, "inProgress");
 

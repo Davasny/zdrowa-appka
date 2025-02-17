@@ -1,0 +1,11 @@
+.git/
+.idea/
+node_modules/
+*.apk
+*.xapk
+mitmproxy.flows
+patched/
+logs/
+.env
+.next/
+storage.json
