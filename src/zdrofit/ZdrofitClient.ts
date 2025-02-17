@@ -50,12 +50,12 @@ export class ZdrofitClient {
   private classTypes: Map<ClassType["id"], ClassType>;
   private categories: Map<Category["id"], Category>;
 
-  constructor(loginData: LoginPayload) {
+  constructor(loginData: LoginPayload, retryEnabled = true) {
     this.loginData = loginData;
 
     this.client = wretch(ZDROFIT_API_URL).middlewares([
       retry({
-        maxAttempts: 3,
+        maxAttempts: retryEnabled ? 3 : 0,
         onRetry: async (args) => {
           await this.authorize();
 
@@ -82,9 +82,12 @@ export class ZdrofitClient {
     this.categories = new Map();
   }
 
-  static async getInstance(login: LoginPayload): Promise<ZdrofitClient> {
+  static async getInstance(
+    login: LoginPayload,
+    retryEnabled = true,
+  ): Promise<ZdrofitClient> {
     if (!ZdrofitClient.instance) {
-      ZdrofitClient.instance = new ZdrofitClient(login);
+      ZdrofitClient.instance = new ZdrofitClient(login, retryEnabled);
       await ZdrofitClient.instance.authorize();
     }
 

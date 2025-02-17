@@ -14,13 +14,16 @@ if (!password) {
 }
 
 const bookClassJob = async (job: Job) => {
-  const zdrofitClient = await ZdrofitClient.getInstance({
-    username,
-    password,
-    network_id: "mfp",
-  });
+  const zdrofitClient = await ZdrofitClient.getInstance(
+    {
+      username,
+      password,
+      network_id: "mfp",
+    },
+    false,
+  );
 
-  const maxRetries = 5;
+  const maxRetries = 10;
 
   for (let i = 1; i <= maxRetries; i++) {
     try {
@@ -61,7 +64,7 @@ const main = async () => {
     const jobs = await s.getPendingJobs();
 
     const jobsToExecute = jobs.filter(
-      (job) => job.executionTimestamp < new Date().getTime() + 5_000,
+      (job) => job.executionTimestamp < new Date().getTime(),
     );
 
     console.log(
