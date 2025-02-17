@@ -15,10 +15,12 @@ export const FilterByLocation = () => {
   const { data: clubs } = useGetClubs();
 
   const collection = createListCollection({
-    items: (clubs || []).map((c) => ({
-      label: c.name,
-      value: c.id.toString(),
-    })),
+    items: (clubs || [])
+      .map((c) => ({
+        label: c.name,
+        value: c.id.toString(),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label)),
   });
 
   const [filters, setFilters] = useAtom(filterByLocationAtom);
