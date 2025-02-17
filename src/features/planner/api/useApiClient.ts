@@ -1,7 +1,7 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import wretch from "wretch";
 
-const API_URL = "http://localhost:3000/api";
+const API_URL = "/api";
 
 export const apiClient = wretch(API_URL);
 
