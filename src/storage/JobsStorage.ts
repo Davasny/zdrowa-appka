@@ -3,6 +3,8 @@ import { ExerciseClassSimple } from "@/zdrofit/types/exerciseClasses";
 import { promises as fs } from "fs";
 import { ULID, ulid } from "ulidx";
 
+const STORAGE_FILE_PATH = process.env.STORAGE_FILE_PATH || "storage.json";
+
 export interface Job {
   id: ULID;
   executionTimestamp: number;
@@ -14,27 +16,25 @@ export interface Job {
 }
 
 export class JobsStorage {
-  private readonly storageFilePath = "storage.json";
-
   constructor() {}
 
   // Helper method: read jobs from the storage file.
   private async readJobsFromFile(): Promise<Job[]> {
     try {
-      await fs.access(this.storageFilePath);
+      await fs.access(STORAGE_FILE_PATH);
     } catch (e) {
       // if not, create it
-      await fs.writeFile(this.storageFilePath, "[]", "utf8");
+      await fs.writeFile(STORAGE_FILE_PATH, "[]", "utf8");
     }
 
-    const data = await fs.readFile(this.storageFilePath, "utf8");
+    const data = await fs.readFile(STORAGE_FILE_PATH, "utf8");
     return JSON.parse(data) as Job[];
   }
 
   // Helper method: write jobs to the storage file.
   private async writeJobsToFile(jobs: Job[]): Promise<void> {
     await fs.writeFile(
-      this.storageFilePath,
+      STORAGE_FILE_PATH,
       JSON.stringify(jobs, null, 2),
       "utf8",
     );
