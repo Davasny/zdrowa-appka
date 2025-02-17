@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import wretch, { Wretch } from "wretch";
 import { retry } from "wretch/middlewares";
 import { Category } from "./types/categories";
@@ -340,6 +341,8 @@ export class ZdrofitClient {
   }
 
   convertStringsToDate(date: DateString, hour: HourString): Date {
-    return new Date(`${date}T${hour}:00`);
+    return DateTime.fromISO(`${date}T${hour}:00`, {
+      zone: "Europe/Warsaw",
+    }).toJSDate();
   }
 }
