@@ -20,16 +20,31 @@ const bookClassJob = async (job: Job) => {
     network_id: "mfp",
   });
 
-  console.log(
-    `[${new Date().toISOString()}] Booking class`,
-    JSON.stringify(job.class),
-  );
+  const maxRetries = 5;
 
-  await zdrofitClient.bookOrCancelClass({
-    action: "book",
-    date: job.class.date,
-    classId: job.class.classId.toString(),
-  });
+  for (let i = 1; i <= maxRetries; i++) {
+    try {
+      console.log(
+        `[${new Date().toISOString()}] [${job.class.classId}] [${i}/${maxRetries}] Booking class`,
+      );
+
+      await zdrofitClient.bookOrCancelClass({
+        action: "book",
+        date: job.class.date,
+        classId: job.class.classId.toString(),
+      });
+
+      console.log(
+        `[${new Date().toISOString()}] [${job.class.classId}] [${i}/${maxRetries}] Booked class`,
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 1_000));
+
+      break;
+    } catch (e) {
+      console.log(`[${i}/${maxRetries}] [${job.class.classId}] Retrying`);
+    }
+  }
 
   console.log(
     `[${new Date().toISOString()}] Booked`,
