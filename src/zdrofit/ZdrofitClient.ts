@@ -241,10 +241,14 @@ export class ZdrofitClient {
       };
     }
 
+    console.log("Booking class with payload", JSON.stringify(payload));
+
     const response = await this.client
       .url(url)
       .post(payload)
       .json<BookExerciseClassResponse>();
+
+    console.log("Class booking response", JSON.stringify(response));
 
     return response;
   }
