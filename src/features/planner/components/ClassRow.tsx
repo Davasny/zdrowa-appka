@@ -5,7 +5,10 @@ import {
   useGetPlannedJobs,
   useGetUserClasses,
 } from "@/features/planner/api/useApi";
-import { filterByNameAtom } from "@/features/planner/atoms/filterAtom";
+import {
+  filterByBookedAtom,
+  filterByNameAtom,
+} from "@/features/planner/atoms/filterAtom";
 import { ClassDetails } from "@/features/planner/components/ClassDetails";
 import { ExerciseClassSimple } from "@/zdrofit/types/exerciseClasses";
 import { DialogBackdrop, Flex, Text } from "@chakra-ui/react";
@@ -18,7 +21,8 @@ export const ClassRow = ({
   simpleClass: ExerciseClassSimple;
 }) => {
   const [open, setOpen] = useState(false);
-  const filterByName = useAtomValue(filterByNameAtom);
+  const filterByNameValue = useAtomValue(filterByNameAtom);
+  const filterByBookedValue = useAtomValue(filterByBookedAtom);
 
   const { map: classTypes } = useGetClassTypes();
   const { map: clubs } = useGetClubs();
@@ -33,9 +37,17 @@ export const ClassRow = ({
     (job) => job.class.classId === simpleClass.id,
   );
 
-  const isVisible =
-    filterByName.length === 0 ||
-    classType?.name.toLowerCase().includes(filterByName.toLowerCase());
+  let isVisible = true;
+
+  if (filterByNameValue.length > 0) {
+    isVisible = Boolean(
+      classType?.name.toLowerCase().includes(filterByNameValue.toLowerCase()),
+    );
+  }
+
+  if (filterByBookedValue) {
+    isVisible = Boolean(isBooked || isPlannedToBook);
+  }
 
   if (!isVisible) {
     return null;

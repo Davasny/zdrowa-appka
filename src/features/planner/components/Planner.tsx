@@ -9,6 +9,7 @@ import { getStartOfWeek } from "@/features/planner/utils/getStartOfWeek";
 import { Button, Flex, Table, Text } from "@chakra-ui/react";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { FilterByBooked } from "@/features/planner/components/FilterByBooked";
 
 export const Planner = () => {
   const [weekStart, setWeekStart] = useState<Date>(getStartOfWeek(new Date()));
@@ -34,6 +35,7 @@ export const Planner = () => {
       <Flex gap={2}>
         <FilterByLocation />
         <FilterByName />
+        <FilterByBooked />
         <RefreshButton />
       </Flex>
 

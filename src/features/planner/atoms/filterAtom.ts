@@ -7,3 +7,5 @@ export const filterByLocationAtom = atomWithStorage<number[]>(
 );
 
 export const filterByNameAtom = atom<string>("");
+
+export const filterByBookedAtom = atom<boolean>(false);
