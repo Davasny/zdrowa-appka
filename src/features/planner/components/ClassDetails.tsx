@@ -109,6 +109,7 @@ export const ClassDetails = ({
   const summaries = [
     { label: "Status", value: state },
     { label: "Kiedy", value: `${simpleClass.date} ${simpleClass.start_time}` },
+    { label: "Czas trwania", value: simpleClass.duration },
     {
       label: "Zapisani",
       value: classDetails
