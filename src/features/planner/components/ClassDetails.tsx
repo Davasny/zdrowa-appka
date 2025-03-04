@@ -6,16 +6,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { toaster } from "@/components/ui/toaster";
 import {
+  bookOrCancelClass,
   useGetClassDetails,
   useGetClassTypes,
   useGetInstructors,
   useGetPlannedJobs,
 } from "@/features/planner/api/useApi";
-import { apiClient } from "@/features/planner/api/useApiClient";
 import { ClassIntensityStatus } from "@/features/planner/components/ClassIntensityStatus";
-import { queryClient } from "@/pages/_app";
 import {
   ExerciseClassSimple,
   ExerciseClassStateEnum,
@@ -57,48 +55,14 @@ export const ClassDetails = ({
 
   const stringDate = dayjs(simpleClass.dateObject).format("YYYY-MM-DD");
 
-  const handleBookOrCacl = (action: "book" | "cancel") => {
-    const url = action === "book" ? "/book-class" : "/cancel-class";
-
+  const handleBookOrCancel = (action: "book" | "cancel") => {
     if (action === "cancel") setCancelInProgress(true);
     if (action === "book") setBookInProgress(true);
 
-    void apiClient
-      .url(url)
-      .post({
-        classId: simpleClass.id,
-        date: stringDate,
-      })
-      .json()
-      .then(async () => {
-        await Promise.all([
-          queryClient.invalidateQueries({
-            queryKey: ["/find-classes", stringDate],
-          }),
-          queryClient.invalidateQueries({
-            queryKey: ["/user-classes"],
-          }),
-          queryClient.invalidateQueries({
-            queryKey: ["/planned-jobs"],
-          }),
-        ]);
-
-        toaster.create({
-          title: `${action}ed`,
-          type: "success",
-        });
-      })
-      .catch((e) => {
-        toaster.create({
-          title: `Failed to ${action}`,
-          type: "error",
-          description: e.message,
-        });
-      })
-      .finally(() => {
-        setBookInProgress(false);
-        setCancelInProgress(false);
-      });
+    void bookOrCancelClass(simpleClass.id, stringDate, action).finally(() => {
+      setBookInProgress(false);
+      setCancelInProgress(false);
+    });
   };
 
   let state = ExerciseClassStateEnum[simpleClass.state] as string;
@@ -153,7 +117,7 @@ export const ClassDetails = ({
           colorPalette="red"
           disabled={!canSignOut}
           loading={cancelInProgress}
-          onClick={() => handleBookOrCacl("cancel")}
+          onClick={() => handleBookOrCancel("cancel")}
         >
           Wypisz
         </Button>
@@ -162,7 +126,7 @@ export const ClassDetails = ({
           colorPalette="orange"
           disabled={canSignOut}
           loading={bookInProgress}
-          onClick={() => handleBookOrCacl("book")}
+          onClick={() => handleBookOrCancel("book")}
         >
           Zabookuj
         </Button>

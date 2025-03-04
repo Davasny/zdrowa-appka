@@ -9,14 +9,64 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useGetAllJobs } from "@/features/planner/api/useApi";
+import {
+  bookOrCancelClass,
+  useGetAllJobs,
+} from "@/features/planner/api/useApi";
+import { Job } from "@/storage/JobsStorage";
 import { Button, Flex, IconButton, Table } from "@chakra-ui/react";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { MdDelete } from "react-icons/md";
 import { RiArchiveStackFill } from "react-icons/ri";
 
-export const AllJobsDialogContent = () => {
+const AllJobsDialogTableRow = ({ job }: { job: Job }) => {
+  const [cancelInProgress, setCancelInProgress] = useState(false);
+
+  const handleCancel = () => {
+    setCancelInProgress(true);
+
+    void bookOrCancelClass(job.class.classId, job.class.date, "cancel").finally(
+      () => {
+        setCancelInProgress(false);
+      },
+    );
+  };
+
+  return (
+    <Table.Row key={job.id}>
+      <Table.Cell>{job.class.classId}</Table.Cell>
+
+      <Table.Cell>{job.class.date}</Table.Cell>
+
+      <Table.Cell>
+        {dayjs.unix(job.executionTimestamp / 1000).format("YYYY-MM-DD HH:mm")}
+      </Table.Cell>
+
+      <Table.Cell>{job.state}</Table.Cell>
+
+      <Table.Cell>
+        {job.state === "scheduled" || job.state === "inProgress" ? (
+          <IconButton
+            size="xs"
+            colorPalette="red"
+            loading={cancelInProgress}
+            onClick={handleCancel}
+          >
+            <MdDelete />
+          </IconButton>
+        ) : null}
+      </Table.Cell>
+    </Table.Row>
+  );
+};
+
+const AllJobsDialogContent = () => {
   const { data } = useGetAllJobs();
+
+  const sortedJobs = data?.sort(
+    (a, b) => b.executionTimestamp - a.executionTimestamp,
+  );
 
   return (
     <DialogContent>
@@ -32,24 +82,12 @@ export const AllJobsDialogContent = () => {
               <Table.ColumnHeader>data zajęć</Table.ColumnHeader>
               <Table.ColumnHeader>data taska</Table.ColumnHeader>
               <Table.ColumnHeader>status</Table.ColumnHeader>
+              <Table.ColumnHeader></Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
 
           <Table.Body>
-            {data
-              ?.sort((a, b) => a.id.localeCompare(b.id))
-              .map((item) => (
-                <Table.Row key={item.id}>
-                  <Table.Cell>{item.class.classId}</Table.Cell>
-                  <Table.Cell>{item.class.date}</Table.Cell>
-                  <Table.Cell>
-                    {dayjs
-                      .unix(item.executionTimestamp / 1000)
-                      .format("YYYY-MM-DD HH:mm")}
-                  </Table.Cell>
-                  <Table.Cell>{item.state}</Table.Cell>
-                </Table.Row>
-              ))}
+            {sortedJobs?.map((job) => <AllJobsDialogTableRow job={job} />)}
           </Table.Body>
         </Table.Root>
       </DialogBody>
