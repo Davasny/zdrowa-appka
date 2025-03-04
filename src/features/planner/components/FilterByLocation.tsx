@@ -34,7 +34,6 @@ export const FilterByLocation = () => {
       value={filters.map(String)}
       onValueChange={(e) => setFilters(e.value.map(Number))}
     >
-      <SelectLabel>Wybierz lokalizację</SelectLabel>
       <SelectTrigger>
         <SelectValueText placeholder="Club" />
       </SelectTrigger>

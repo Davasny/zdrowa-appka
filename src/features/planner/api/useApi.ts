@@ -11,6 +11,7 @@ import {
   ExerciseClassSimple,
 } from "@/zdrofit/types/exerciseClasses";
 import { Instructor } from "@/zdrofit/types/instructors";
+import { UserHistoryResponse } from "@/zdrofit/types/userHistory";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetInstructors = () => useApiClient<Instructor>("/instructors");
@@ -48,4 +49,10 @@ export const useGetAllJobs = () =>
   useQuery({
     queryKey: ["/jobs"],
     queryFn: () => backendFetcher<Job[]>("/jobs"),
+  });
+
+export const useGetUserHistory = () =>
+  useQuery({
+    queryKey: ["/user-history"],
+    queryFn: () => backendFetcher<UserHistoryResponse>("/user-history"),
   });

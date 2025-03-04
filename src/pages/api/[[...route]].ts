@@ -179,6 +179,11 @@ app.get("/jobs", async (c) => {
   return c.json(jobs);
 });
 
+app.get("/user-history", async (c) => {
+  const userHistory = await zdrofitClient.getUserHistory();
+  return c.json(userHistory);
+});
+
 app.post("/reset-cache", async (c) => {
   await zdrofitClient.removeCachedData();
   return c.json({ message: "Cache reset" });

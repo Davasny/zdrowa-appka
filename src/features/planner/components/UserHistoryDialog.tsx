@@ -9,47 +9,42 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useGetAllJobs } from "@/features/planner/api/useApi";
+import { useGetUserHistory } from "@/features/planner/api/useApi";
 import { Button, Flex, IconButton, Table } from "@chakra-ui/react";
-import dayjs from "dayjs";
 import { useState } from "react";
-import { RiArchiveStackFill } from "react-icons/ri";
+import { FaClockRotateLeft } from "react-icons/fa6";
 
-export const AllJobsDialogContent = () => {
-  const { data } = useGetAllJobs();
+export const UserHistoryDialogContent = () => {
+  const { data } = useGetUserHistory();
 
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Archiwalne taski</DialogTitle>
+        <DialogTitle>
+          Wszystkie wizyty (page {data?.page}/{data?.pages})
+        </DialogTitle>
       </DialogHeader>
 
       <DialogBody>
         <Table.Root size="sm">
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeader>id</Table.ColumnHeader>
-              <Table.ColumnHeader>data zajęć</Table.ColumnHeader>
-              <Table.ColumnHeader>data taska</Table.ColumnHeader>
-              <Table.ColumnHeader>status</Table.ColumnHeader>
+              <Table.ColumnHeader>data</Table.ColumnHeader>
+              <Table.ColumnHeader>zajęcia</Table.ColumnHeader>
+              <Table.ColumnHeader>lokalizacja</Table.ColumnHeader>
+              <Table.ColumnHeader>obecność</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
 
           <Table.Body>
-            {data
-              ?.sort((a, b) => a.id.localeCompare(b.id))
-              .map((item) => (
-                <Table.Row key={item.id}>
-                  <Table.Cell>{item.class.classId}</Table.Cell>
-                  <Table.Cell>{item.class.date}</Table.Cell>
-                  <Table.Cell>
-                    {dayjs
-                      .unix(item.executionTimestamp / 1000)
-                      .format("YYYY-MM-DD HH:mm")}
-                  </Table.Cell>
-                  <Table.Cell>{item.state}</Table.Cell>
-                </Table.Row>
-              ))}
+            {data?.activities?.map((item) => (
+              <Table.Row key={item.id}>
+                <Table.Cell>{item.date}</Table.Cell>
+                <Table.Cell>{item.name}</Table.Cell>
+                <Table.Cell>{item.club.name}</Table.Cell>
+                <Table.Cell>{item.has_attended ? "tak" : "nie"}</Table.Cell>
+              </Table.Row>
+            ))}
           </Table.Body>
         </Table.Root>
       </DialogBody>
@@ -64,7 +59,7 @@ export const AllJobsDialogContent = () => {
   );
 };
 
-export const AllJobsDialog = () => {
+export const UserHistoryDialog = () => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -77,16 +72,16 @@ export const AllJobsDialog = () => {
       <DialogTrigger asChild>
         <Flex alignItems="end">
           <IconButton
-            aria-label="Otwórz archiwalne taski"
+            aria-label="Otwórz historię użytkownika"
             size="sm"
             variant="outline"
           >
-            <RiArchiveStackFill />
+            <FaClockRotateLeft />
           </IconButton>
         </Flex>
       </DialogTrigger>
 
-      {open ? <AllJobsDialogContent /> : null}
+      {open ? <UserHistoryDialogContent /> : null}
     </DialogRoot>
   );
 };

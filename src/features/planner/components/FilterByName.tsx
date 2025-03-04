@@ -7,7 +7,7 @@ export const FilterByName = () => {
   const [searchText, setSearchText] = useAtom(filterByNameAtom);
 
   return (
-    <Field label="Szukaj">
+    <Field>
       <Input
         placeholder="nazwa zajęć"
         value={searchText}
