@@ -9,6 +9,7 @@ import { generateFullHours } from "@/features/planner/utils/generateFullHours";
 import { getStartOfWeek } from "@/features/planner/utils/getStartOfWeek";
 import { Button, Flex, Table } from "@chakra-ui/react";
 import { useState } from "react";
+import { AllJobsDialog } from "@/features/planner/components/AllJobsDialog";
 
 export const Planner = () => {
   const [weekStart, setWeekStart] = useState<Date>(getStartOfWeek(new Date()));
@@ -36,6 +37,7 @@ export const Planner = () => {
         <FilterByName />
         <FilterByBooked />
         <RefreshButton />
+        <AllJobsDialog />
       </Flex>
 
       <Flex justifyContent="space-between">

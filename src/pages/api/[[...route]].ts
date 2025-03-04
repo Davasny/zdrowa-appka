@@ -173,6 +173,12 @@ app.get("/planned-jobs", async (c) => {
   return c.json(jobs);
 });
 
+app.get("/jobs", async (c) => {
+  const jobStorage = new JobsStorage();
+  const jobs = await jobStorage.getJobs();
+  return c.json(jobs);
+});
+
 app.post("/reset-cache", async (c) => {
   await zdrofitClient.removeCachedData();
   return c.json({ message: "Cache reset" });

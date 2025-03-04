@@ -43,3 +43,9 @@ export const useGetPlannedJobs = () =>
     queryKey: ["/planned-jobs"],
     queryFn: () => backendFetcher<Job[]>("/planned-jobs"),
   });
+
+export const useGetAllJobs = () =>
+  useQuery({
+    queryKey: ["/jobs"],
+    queryFn: () => backendFetcher<Job[]>("/jobs"),
+  });
