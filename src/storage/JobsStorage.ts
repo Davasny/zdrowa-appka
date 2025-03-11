@@ -8,11 +8,12 @@ const STORAGE_FILE_PATH = process.env.STORAGE_FILE_PATH || "storage.json";
 export interface Job {
   id: ULID;
   executionTimestamp: number;
-  state: "scheduled" | "done" | "inProgress" | "canceled";
+  state: "scheduled" | "done" | "inProgress" | "canceled" | "failed";
   class: {
     classId: ExerciseClassSimple["id"];
     date: DateString;
   };
+  error?: string;
 }
 
 export class JobsStorage {
@@ -69,11 +70,32 @@ export class JobsStorage {
   ): Promise<Job[]> {
     const jobs = await this.getJobs();
     const jobIndex = jobs.findIndex((job) => job.id === id);
+
     if (jobIndex === -1) {
       throw new Error(`Job with id ${id} not found.`);
     }
+
     jobs[jobIndex].state = state;
+
     await this.writeJobsToFile(jobs);
+
     return jobs;
+  }
+
+  public async markJobAsFailed(
+    id: Job["id"],
+    error: Job["error"],
+  ): Promise<void> {
+    const jobs = await this.getJobs();
+    const jobIndex = jobs.findIndex((job) => job.id === id);
+
+    if (jobIndex === -1) {
+      throw new Error(`Job with id ${id} not found.`);
+    }
+
+    jobs[jobIndex].state = "failed";
+    jobs[jobIndex].error = error;
+
+    await this.writeJobsToFile(jobs);
   }
 }

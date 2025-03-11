@@ -41,7 +41,7 @@ const bookClassJob = async (job: Job) => {
         `[${new Date().toISOString()}] [${job.class.classId}] [${i}/${maxRetries}] Booked class`,
       );
 
-      await new Promise((resolve) => setTimeout(resolve, 1_000));
+      await new Promise((resolve) => setTimeout(resolve, 2_000));
 
       break;
     } catch (e) {
@@ -79,9 +79,17 @@ const main = async () => {
 
       await s.updateJobState(job.id, "inProgress");
 
-      bookClassJob(job).then(async () => {
-        await s.updateJobState(job.id, "done");
-      });
+      bookClassJob(job)
+        .then(async () => {
+          await s.updateJobState(job.id, "done");
+        })
+        .catch(async (error) => {
+          if (error instanceof Error) {
+            await s.markJobAsFailed(job.id, error.message);
+          } else {
+            await s.markJobAsFailed(job.id, "Unknown error");
+          }
+        });
     }
   }, 2_000);
 };
