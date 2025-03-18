@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import wretch, { Wretch } from "wretch";
+import AbortAddon from "wretch/addons/abort";
 import { retry } from "wretch/middlewares";
 import { Category } from "./types/categories";
 import { ClassType } from "./types/classTypes";
@@ -97,8 +98,10 @@ export class ZdrofitClient {
   async authorize(): Promise<void> {
     const token = await wretch(ZDROFIT_API_URL)
       .url("/api-service/v2/without_auth/login?parent_view=login")
+      .addon(AbortAddon())
       .headers(DEVICE_SPECIFIC_HEADERS)
       .post(this.loginData)
+      .setTimeout(5_000)
       .json<LoginResponse>();
 
     this.accessToken = token.access_token;
@@ -245,7 +248,9 @@ export class ZdrofitClient {
 
     const response = await this.client
       .url(url)
+      .addon(AbortAddon())
       .post(payload)
+      .setTimeout(2_000)
       .json<BookExerciseClassResponse>();
 
     console.log("Class booking response", JSON.stringify(response));

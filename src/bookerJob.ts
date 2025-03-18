@@ -13,6 +13,9 @@ if (!password) {
   throw new Error("Password is not defined");
 }
 
+const MAX_RETRIES = 5;
+const SLEEP_TIME = 1_000;
+
 const bookClassJob = async (job: Job) => {
   const zdrofitClient = await ZdrofitClient.getInstance(
     {
@@ -23,12 +26,10 @@ const bookClassJob = async (job: Job) => {
     false,
   );
 
-  const maxRetries = 10;
-
-  for (let i = 1; i <= maxRetries; i++) {
+  for (let i = 1; i <= MAX_RETRIES; i++) {
     try {
       console.log(
-        `[${new Date().toISOString()}] [${job.class.classId}] [${i}/${maxRetries}] Booking class`,
+        `[${new Date().toISOString()}] [${job.class.classId}] [${i}/${MAX_RETRIES}] Booking class`,
       );
 
       await zdrofitClient.bookOrCancelClass({
@@ -38,14 +39,17 @@ const bookClassJob = async (job: Job) => {
       });
 
       console.log(
-        `[${new Date().toISOString()}] [${job.class.classId}] [${i}/${maxRetries}] Booked class`,
+        `[${new Date().toISOString()}] [${job.class.classId}] [${i}/${MAX_RETRIES}] Booked class`,
       );
-
-      await new Promise((resolve) => setTimeout(resolve, 2_000));
 
       break;
     } catch (e) {
-      console.log(`[${i}/${maxRetries}] [${job.class.classId}] Retrying`);
+      console.log(
+        `[${i}/${MAX_RETRIES}] [${job.class.classId}] Error occurred`,
+        e,
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, SLEEP_TIME));
     }
   }
 
@@ -58,17 +62,17 @@ const bookClassJob = async (job: Job) => {
 const main = async () => {
   const s = new JobsStorage();
 
-  setInterval(async () => {
-    console.log(`[${new Date().toISOString()}] Checking for pending jobs`);
+  const intervalMs = 2_000;
 
+  console.log(
+    `[${new Date().toISOString()}] Starting bookerJob and checking jobs every ${intervalMs / 1000}s`,
+  );
+
+  setInterval(async () => {
     const jobs = await s.getPendingJobs();
 
     const jobsToExecute = jobs.filter(
       (job) => job.executionTimestamp < new Date().getTime(),
-    );
-
-    console.log(
-      `[${new Date().toISOString()}] Pending jobs: ${jobs.length}, to be executed now: ${jobsToExecute.length}`,
     );
 
     for (const job of jobsToExecute) {
@@ -91,7 +95,7 @@ const main = async () => {
           }
         });
     }
-  }, 2_000);
+  }, intervalMs);
 };
 
 main();
