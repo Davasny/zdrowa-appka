@@ -26,8 +26,6 @@ import { UserHistoryPayload, UserHistoryResponse } from "./types/userHistory";
 const ZDROFIT_API_URL = "https://appfitness.zdrofit.pl";
 
 const DEVICE_SPECIFIC_HEADERS = {
-  "x-device-id": "f0e9c82635357034",
-  "x-device-other": "AC2003:Nord",
   "x-language": "en",
   "x-device-os": "android:12",
   "x-app-version": "1.0.1:203",
@@ -252,8 +250,6 @@ export class ZdrofitClient {
       .post(payload)
       .setTimeout(2_000)
       .json<BookExerciseClassResponse>();
-
-    console.log("Class booking response", JSON.stringify(response));
 
     return response;
   }
