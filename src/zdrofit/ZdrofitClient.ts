@@ -248,7 +248,7 @@ export class ZdrofitClient {
       .url(url)
       .addon(AbortAddon())
       .post(payload)
-      .setTimeout(2_000)
+      .setTimeout(5_000)
       .json<BookExerciseClassResponse>();
 
     return response;
