@@ -28,9 +28,9 @@ const ZDROFIT_API_URL = "https://appfitness.zdrofit.pl";
 const DEVICE_SPECIFIC_HEADERS = {
   "x-language": "en",
   "x-device-os": "android:12",
-  "x-app-version": "1.0.1:203",
+  "x-app-version": "2.0.12:209",
   "user-agent":
-    "com.pl.benefit_systems_mobile.prod/203 (Linux; U; Android 12; en_US; AC2003; Build/RKQ1.211119.001; Cronet/133.0.6876.3)",
+    "com.pl.benefit_systems_mobile.prod/209 (Linux; U; Android 12; en_US; AC2003; Build/RKQ1.211119.001; Cronet/133.0.6876.3)",
 };
 
 export class ZdrofitClient {
